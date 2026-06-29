@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import type { Tienda } from '../types';
-import { registroCliente, loginCliente, olvidePasswordCliente, reenviarVerificacionCliente } from '../api/auth';
+import { registroCliente, loginCliente, olvidePasswordCliente, reenviarVerificacionCliente, verificarEmailCliente } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { useCarrito } from '../hooks/useTienda';
 import { useCarritoStore } from '../store/carrito';
@@ -14,7 +14,7 @@ interface Props {
   tienda: Tienda;
 }
 
-type Modo = 'login' | 'registro' | 'recuperar';
+type Modo = 'login' | 'registro' | 'recuperar' | 'reenviar';
 
 function resolveColors(tienda: Tienda) {
   const acento = tienda.temaConfig?.colorAcento || '#6366f1';
@@ -37,10 +37,25 @@ export default function AuthPage({ tienda }: Props) {
     '--s-surface': c.isDark ? '#1a1a2e' : '#f8f8f8', '--s-acento': c.acento,
   } as React.CSSProperties;
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [modo, setModo] = useState<Modo>('login');
   const [form, setForm] = useState({ nombre: '', apellido: '', telefono: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [okMsg, setOkMsg] = useState('');
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (!token) return;
+    verificarEmailCliente(token)
+      .then(() => {
+        setOkMsg('¡Email verificado! Ya podés iniciar sesión.');
+        setSearchParams({}, { replace: true });
+      })
+      .catch(() => {
+        setError('El enlace de verificación es inválido o ya expiró. Solicitá uno nuevo.');
+        setSearchParams({}, { replace: true });
+      });
+  }, []);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -82,6 +97,7 @@ export default function AuthPage({ tienda }: Props) {
     setError(''); setOkMsg('');
     if (modo === 'login') loginMut.mutate();
     else if (modo === 'registro') registroMut.mutate();
+    else if (modo === 'reenviar') reenviarMut.mutate();
     else recuperarMut.mutate();
   };
 
@@ -90,9 +106,13 @@ export default function AuthPage({ tienda }: Props) {
 
   const cambiarModo = (m: Modo) => { setModo(m); setError(''); setOkMsg(''); };
 
-  const titulo = modo === 'login' ? 'Iniciar sesión' : modo === 'registro' ? 'Crear cuenta' : 'Recuperar contraseña';
+  const titulo = modo === 'login' ? 'Iniciar sesión'
+    : modo === 'registro' ? 'Crear cuenta'
+    : modo === 'reenviar' ? 'Verificar cuenta'
+    : 'Recuperar contraseña';
   const subtitulo = modo === 'login' ? '¡Bienvenido de nuevo! Ingresá para continuar'
     : modo === 'registro' ? `Creá tu cuenta en ${tienda.nombre}`
+    : modo === 'reenviar' ? 'Te reenviamos el enlace de verificación a tu email'
     : 'Ingresá tu email y te enviaremos instrucciones';
 
   const inputWrap = 'flex items-center w-full bg-transparent border border-gray-300/60 h-12 rounded-full overflow-hidden pl-6 gap-2';
@@ -137,8 +157,8 @@ export default function AuthPage({ tienda }: Props) {
             <input type="email" placeholder="Email" className={inputCls} value={form.email} onChange={set('email')} required />
           </div>
 
-          {/* Password (no en recuperar) */}
-          {modo !== 'recuperar' && (
+          {/* Password (no en recuperar ni reenviar) */}
+          {modo !== 'recuperar' && modo !== 'reenviar' && (
             <div className={`${inputWrap} mt-4`}>
               <svg width="13" height="17" viewBox="0 0 13 17" fill="none">
                 <path d="M13 8.5c0-.938-.729-1.7-1.625-1.7h-.812V4.25C10.563 1.907 8.74 0 6.5 0S2.438 1.907 2.438 4.25V6.8h-.813C.729 6.8 0 7.562 0 8.5v6.8c0 .938.729 1.7 1.625 1.7h9.75c.896 0 1.625-.762 1.625-1.7zM4.063 4.25c0-1.406 1.093-2.55 2.437-2.55s2.438 1.144 2.438 2.55V6.8H4.061z" fill="#6B7280" />
@@ -147,9 +167,12 @@ export default function AuthPage({ tienda }: Props) {
             </div>
           )}
 
-          {/* Olvidé contraseña (solo en login) */}
+          {/* Links de ayuda (solo en login) */}
           {modo === 'login' && (
-            <div className="w-full flex items-center justify-end mt-3">
+            <div className="w-full flex items-center justify-between mt-3">
+              <button type="button" onClick={() => cambiarModo('reenviar')} className="text-sm underline border-none bg-transparent cursor-pointer" style={{ color: acento }}>
+                ¿No verificaste tu cuenta?
+              </button>
               <button type="button" onClick={() => cambiarModo('recuperar')} className="text-sm underline border-none bg-transparent cursor-pointer" style={{ color: acento }}>
                 ¿Olvidaste tu contraseña?
               </button>
@@ -185,6 +208,7 @@ export default function AuthPage({ tienda }: Props) {
             {cargando ? 'Procesando...'
               : modo === 'login' ? 'Ingresar'
               : modo === 'registro' ? 'Crear cuenta'
+              : modo === 'reenviar' ? 'Reenviar email'
               : 'Enviar instrucciones'}
           </button>
 
@@ -196,7 +220,7 @@ export default function AuthPage({ tienda }: Props) {
             {modo === 'registro' && (
               <>¿Ya tenés cuenta? <button type="button" onClick={() => cambiarModo('login')} className="border-none bg-transparent cursor-pointer hover:underline font-medium" style={{ color: acento }}>Iniciá sesión</button></>
             )}
-            {modo === 'recuperar' && (
+            {(modo === 'recuperar' || modo === 'reenviar') && (
               <button type="button" onClick={() => cambiarModo('login')} className="border-none bg-transparent cursor-pointer hover:underline font-medium" style={{ color: acento }}>← Volver a iniciar sesión</button>
             )}
           </p>
