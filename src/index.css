@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --s-bg: #ffffff;
+  --s-surface: #f8f8f8;
+  --s-txt: #1d293d;
+  --s-muted: #748298;
+  --s-border: #e5e7eb;
+  --s-acento: #6366f1;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--s-bg);
+  color: var(--s-txt);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#root { min-height: 100svh; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--s-border); border-radius: 2px; }
+
+/* Ocultar scrollbar horizontal del slider de destacados */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Marquee del Hero1 */
+.marquee-inner { animation: marqueeScroll 35s linear infinite; }
+@keyframes marqueeScroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
