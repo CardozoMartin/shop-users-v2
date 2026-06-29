@@ -34,6 +34,13 @@ export const olvidePasswordCliente = async (payload: {
   await api.post('/clientes/olvide-password', payload);
 };
 
+export const reenviarVerificacionCliente = async (payload: {
+  tiendaId: number;
+  email: string;
+}): Promise<void> => {
+  await api.post('/clientes/reenviar-verificacion', payload);
+};
+
 export const getMisPedidos = async (): Promise<Pedido[]> => {
   const { data } = await api.get('/clientes/mis-pedidos');
   return data.datos?.datos ?? data.datos ?? [];

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import type { Tienda } from '../types';
-import { registroCliente, loginCliente, olvidePasswordCliente } from '../api/auth';
+import { registroCliente, loginCliente, olvidePasswordCliente, reenviarVerificacionCliente } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { useCarrito } from '../hooks/useTienda';
 import { useCarritoStore } from '../store/carrito';
@@ -58,8 +58,17 @@ export default function AuthPage({ tienda }: Props) {
       tiendaId: tienda.id, email: form.email, nombre: form.nombre,
       apellido: form.apellido, telefono: form.telefono, password: form.password,
     }),
-    onSuccess: (data) => { setAuth(data, data.token); volver(); },
+    onSuccess: () => {
+      setOkMsg('¡Cuenta creada! Revisá tu email y hacé clic en el enlace de verificación para poder ingresar.');
+      cambiarModo('login');
+    },
     onError: (e: any) => setError(e?.response?.data?.message || 'No pudimos crear la cuenta.'),
+  });
+
+  const reenviarMut = useMutation({
+    mutationFn: () => reenviarVerificacionCliente({ tiendaId: tienda.id, email: form.email }),
+    onSuccess: () => setOkMsg('Te reenviamos el email de verificación. Revisá tu bandeja de entrada.'),
+    onError: () => setError('No pudimos reenviar el email. Intentá de nuevo.'),
   });
 
   const recuperarMut = useMutation({
@@ -76,7 +85,8 @@ export default function AuthPage({ tienda }: Props) {
     else recuperarMut.mutate();
   };
 
-  const cargando = loginMut.isPending || registroMut.isPending || recuperarMut.isPending;
+  const cargando = loginMut.isPending || registroMut.isPending || recuperarMut.isPending || reenviarMut.isPending;
+  const errorNoVerificado = error.toLowerCase().includes('verific');
 
   const cambiarModo = (m: Modo) => { setModo(m); setError(''); setOkMsg(''); };
 
@@ -147,7 +157,22 @@ export default function AuthPage({ tienda }: Props) {
           )}
 
           {/* Mensajes */}
-          {error && <p className="text-sm text-red-500 mt-4 text-center">{error}</p>}
+          {error && (
+            <div className="mt-4 text-center">
+              <p className="text-sm text-red-500">{error}</p>
+              {errorNoVerificado && form.email && (
+                <button
+                  type="button"
+                  disabled={reenviarMut.isPending}
+                  onClick={() => { setError(''); reenviarMut.mutate(); }}
+                  className="mt-2 text-sm underline border-none bg-transparent cursor-pointer disabled:opacity-50"
+                  style={{ color: acento }}
+                >
+                  {reenviarMut.isPending ? 'Enviando...' : 'Reenviar email de verificación'}
+                </button>
+              )}
+            </div>
+          )}
           {okMsg && <p className="text-sm text-green-600 mt-4 text-center">{okMsg}</p>}
 
           {/* Botón principal */}
