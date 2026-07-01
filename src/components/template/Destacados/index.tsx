@@ -70,7 +70,7 @@ export default function Destacados({ tiendaId, acento }: Props) {
         <div
           ref={scrollRef}
           className="flex gap-4 md:gap-6 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
-          style={{ scrollbarWidth: 'none' }}
+          style={{ scrollbarWidth: 'none', paddingLeft: 4, paddingTop: 3 }}
         >
           {isLoading
             ? Array.from({ length: 4 }).map((_, i) => (

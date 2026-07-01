@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
@@ -24,6 +25,7 @@ function resolveColors(tienda: Tienda) {
 
 export default function AuthPage({ tienda }: Props) {
   const navigate = useNavigate();
+  const bp = basePathTienda(tienda.slug);
   const c = resolveColors(tienda);
   const { acento } = c;
   const { setAuth } = useAuthStore();
@@ -45,7 +47,7 @@ export default function AuthPage({ tienda }: Props) {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const volver = () => navigate(`/${tienda.slug}`);
+  const volver = () => navigate(`${bp || "/"}`);
 
   const loginMut = useMutation({
     mutationFn: () => loginCliente({ tiendaId: tienda.id, email: form.email, password: form.password }),
@@ -90,12 +92,12 @@ export default function AuthPage({ tienda }: Props) {
 
   return (
     <div style={cssVars}>
-      <Navbar tienda={tienda} cartCount={cartCount} acento={c.acento} onCartClick={abrirCarrito} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Navbar tienda={tienda} cartCount={cartCount} acento={c.acento} onCartClick={abrirCarrito} onScrollTo={() => navigate(`${bp || "/"}`)} />
 
       <main className="flex flex-col items-center justify-center px-6 py-16 min-h-[70vh]" style={{ background: 'var(--s-bg)' }}>
         <form onSubmit={submit} className="w-full max-w-sm flex flex-col items-center">
           {/* Logo / nombre */}
-          <Link to={`/${tienda.slug}`} className="mb-6">
+          <Link to={`${bp || "/"}`} className="mb-6">
             {tienda.logoUrl
               ? <img src={tienda.logoUrl} alt={tienda.nombre} className="h-10 object-contain" />
               : <span className="text-xl font-semibold" style={{ color: 'var(--s-txt)' }}>{tienda.nombre}</span>}
@@ -178,7 +180,7 @@ export default function AuthPage({ tienda }: Props) {
         </form>
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`${bp || "/"}`)} />
 
       <CartDrawer
         acento={c.acento}

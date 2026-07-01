@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { Tienda, CrearPedidoDto } from '../types';
@@ -55,6 +56,7 @@ const initialForm = {
 
 export default function CheckoutPage({ tienda }: Props) {
   const navigate = useNavigate();
+  const bp = basePathTienda(tienda.slug);
   const c = resolveColors(tienda);
 
   const { carrito } = useCarrito(tienda.id);
@@ -181,7 +183,7 @@ export default function CheckoutPage({ tienda }: Props) {
   if (redirigiendo) {
     return (
       <div style={cssVars}>
-        <Navbar tienda={tienda} cartCount={0} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+        <Navbar tienda={tienda} cartCount={0} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`${bp || "/"}`)} />
         <main className="max-w-lg mx-auto px-6 py-32 text-center min-h-[60vh] flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-4 rounded-full animate-spin mb-6" style={{ borderColor: 'var(--s-border)', borderTopColor: c.acento }} />
           <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--s-txt)' }}>Te estamos redirigiendo a Mercado Pago…</h1>
@@ -195,7 +197,7 @@ export default function CheckoutPage({ tienda }: Props) {
   if (pedidoOk) {
     return (
       <div style={cssVars}>
-        <Navbar tienda={tienda} cartCount={0} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+        <Navbar tienda={tienda} cartCount={0} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`${bp || "/"}`)} />
         <main className="max-w-lg mx-auto px-6 py-24 text-center min-h-[60vh]">
           <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6" style={{ background: `${c.acento}15` }}>
             <svg className="w-8 h-8" fill="none" stroke={c.acento} strokeWidth={2} viewBox="0 0 24 24">
@@ -221,11 +223,11 @@ export default function CheckoutPage({ tienda }: Props) {
               </p>
             </div>
           )}
-          <Link to={`/${tienda.slug}`} className="inline-block px-8 py-3 rounded-full text-sm font-semibold text-white" style={{ background: c.acento }}>
+          <Link to={`${bp || "/"}`} className="inline-block px-8 py-3 rounded-full text-sm font-semibold text-white" style={{ background: c.acento }}>
             Volver a la tienda
           </Link>
         </main>
-        <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+        <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`${bp || "/"}`)} />
       </div>
     );
   }
@@ -234,22 +236,22 @@ export default function CheckoutPage({ tienda }: Props) {
   if (items.length === 0 && !crearPedido.isPending) {
     return (
       <div style={cssVars}>
-        <Navbar tienda={tienda} cartCount={0} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+        <Navbar tienda={tienda} cartCount={0} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`${bp || "/"}`)} />
         <main className="max-w-lg mx-auto px-6 py-24 text-center min-h-[60vh]">
           <p className="text-5xl mb-4">🛒</p>
           <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--s-txt)' }}>Tu carrito está vacío</h1>
-          <Link to={`/${tienda.slug}/productos`} className="inline-block mt-4 px-8 py-3 rounded-full text-sm font-semibold text-white" style={{ background: c.acento }}>
+          <Link to={`${bp}/productos`} className="inline-block mt-4 px-8 py-3 rounded-full text-sm font-semibold text-white" style={{ background: c.acento }}>
             Ver productos
           </Link>
         </main>
-        <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+        <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`${bp || "/"}`)} />
       </div>
     );
   }
 
   return (
     <div style={cssVars}>
-      <Navbar tienda={tienda} cartCount={items.length} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Navbar tienda={tienda} cartCount={items.length} acento={c.acento} onCartClick={() => {}} onScrollTo={() => navigate(`${bp || "/"}`)} />
 
       <main className="max-w-screen-lg mx-auto px-6 py-10 min-h-[60vh]">
         <h1 className="text-3xl font-medium mb-8" style={{ color: 'var(--s-txt)' }}>Finalizar compra</h1>
@@ -472,7 +474,7 @@ export default function CheckoutPage({ tienda }: Props) {
         </form>
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`${bp || "/"}`)} />
     </div>
   );
 }

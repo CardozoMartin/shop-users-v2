@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { Tienda, EstadoPedido } from '../types';
@@ -38,6 +39,7 @@ const ESTADO_INFO: Record<EstadoPedido, { label: string; color: string; bg: stri
 
 export default function MiCuentaPage({ tienda }: Props) {
   const navigate = useNavigate();
+  const bp = basePathTienda(tienda.slug);
   const c = resolveColors(tienda);
   const { cliente, logout } = useAuthStore();
 
@@ -52,7 +54,7 @@ export default function MiCuentaPage({ tienda }: Props) {
   });
 
   // Si no hay sesión, redirigimos al login
-  if (!cliente) return <Navigate to={`/${tienda.slug}/cuenta`} replace />;
+  if (!cliente) return <Navigate to={`${bp}/cuenta`} replace />;
 
   const cssVars = {
     '--s-bg': c.bg, '--s-txt': c.isDark ? '#f1f5f9' : '#1d293d',
@@ -62,7 +64,7 @@ export default function MiCuentaPage({ tienda }: Props) {
 
   return (
     <div style={cssVars}>
-      <Navbar tienda={tienda} cartCount={cartCount} acento={c.acento} onCartClick={abrirCarrito} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Navbar tienda={tienda} cartCount={cartCount} acento={c.acento} onCartClick={abrirCarrito} onScrollTo={() => navigate(`${bp || "/"}`)} />
 
       <main className="max-w-screen-lg mx-auto px-6 py-10 min-h-[60vh]">
         {/* Encabezado de cuenta */}
@@ -77,7 +79,7 @@ export default function MiCuentaPage({ tienda }: Props) {
             </div>
           </div>
           <button
-            onClick={() => { logout(); navigate(`/${tienda.slug}`); }}
+            onClick={() => { logout(); navigate(`${bp || "/"}`); }}
             className="text-sm px-5 py-2 rounded-full border cursor-pointer bg-transparent transition-colors hover:bg-black/5"
             style={{ borderColor: 'var(--s-border)', color: 'var(--s-txt)' }}
           >
@@ -100,7 +102,7 @@ export default function MiCuentaPage({ tienda }: Props) {
           <div className="py-20 text-center rounded-xl" style={{ background: 'var(--s-surface)' }}>
             <p className="text-4xl mb-3">🧾</p>
             <p style={{ color: 'var(--s-muted)' }}>Todavía no tenés pedidos.</p>
-            <button onClick={() => navigate(`/${tienda.slug}/productos`)} className="mt-4 px-6 py-2.5 rounded-full text-sm font-semibold text-white border-none cursor-pointer" style={{ background: c.acento }}>
+            <button onClick={() => navigate(`${bp}/productos`)} className="mt-4 px-6 py-2.5 rounded-full text-sm font-semibold text-white border-none cursor-pointer" style={{ background: c.acento }}>
               Ver productos
             </button>
           </div>
@@ -164,7 +166,7 @@ export default function MiCuentaPage({ tienda }: Props) {
         )}
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`${bp || "/"}`)} />
       <CartDrawer acento={c.acento} isDark={c.isDark} onActualizar={(id, cant) => actualizar.mutate({ itemId: id, cantidad: cant })} onEliminar={(id) => eliminar.mutate(id)} />
     </div>
   );

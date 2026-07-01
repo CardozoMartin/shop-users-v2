@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Tienda } from '../types';
@@ -27,6 +28,7 @@ function fechaCorta(iso: string) {
 
 export default function NosotrosPage({ tienda }: Props) {
   const navigate = useNavigate();
+  const bp = basePathTienda(tienda.slug);
   const c = resolveColors(tienda);
   const [pagina, setPagina] = useState(1);
 
@@ -55,7 +57,7 @@ export default function NosotrosPage({ tienda }: Props) {
         cartCount={cartCount}
         acento={c.acento}
         onCartClick={abrirCarrito}
-        onScrollTo={(id) => navigate(`/${tienda.slug}#${id}`)}
+        onScrollTo={(id) => navigate(`${bp || "/"}#${id}`)}
       />
 
       <main className="min-h-[60vh]">
@@ -189,7 +191,7 @@ export default function NosotrosPage({ tienda }: Props) {
         </section>
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={(id) => navigate(`/${tienda.slug}#${id}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={(id) => navigate(`${bp || "/"}#${id}`)} />
 
       <CartDrawer
         acento={c.acento}

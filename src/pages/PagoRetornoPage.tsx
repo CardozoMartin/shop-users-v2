@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Tienda } from '../types';
 import { useCarrito } from '../hooks/useTienda';
@@ -39,6 +40,7 @@ const RESULTADOS: Record<string, { emoji: string; titulo: string; texto: (n: str
 export default function PagoRetornoPage({ tienda }: Props) {
   const { pedidoId, resultado } = useParams<{ pedidoId: string; resultado: string }>();
   const navigate = useNavigate();
+  const bp = basePathTienda(tienda.slug);
   const c = resolveColors(tienda);
 
   const { carrito } = useCarrito(tienda.id);
@@ -56,7 +58,7 @@ export default function PagoRetornoPage({ tienda }: Props) {
 
   return (
     <div style={cssVars}>
-      <Navbar tienda={tienda} cartCount={cartCount} acento={c.acento} onCartClick={abrirCarrito} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Navbar tienda={tienda} cartCount={cartCount} acento={c.acento} onCartClick={abrirCarrito} onScrollTo={() => navigate(`${bp || "/"}`)} />
 
       <main className="max-w-md mx-auto px-6 py-24 text-center min-h-[60vh]">
         <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 text-4xl" style={{ background: `${info.color}15` }}>
@@ -70,7 +72,7 @@ export default function PagoRetornoPage({ tienda }: Props) {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {esError && (
             <button
-              onClick={() => navigate(`/${tienda.slug}/checkout`)}
+              onClick={() => navigate(`${bp}/checkout`)}
               className="px-8 py-3 rounded-full text-sm font-semibold text-white border-none cursor-pointer"
               style={{ background: c.acento }}
             >
@@ -78,7 +80,7 @@ export default function PagoRetornoPage({ tienda }: Props) {
             </button>
           )}
           <Link
-            to={`/${tienda.slug}`}
+            to={`${bp || "/"}`}
             className="px-8 py-3 rounded-full text-sm font-semibold border transition-colors"
             style={{ borderColor: 'var(--s-border)', color: 'var(--s-txt)' }}
           >
@@ -87,7 +89,7 @@ export default function PagoRetornoPage({ tienda }: Props) {
         </div>
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`/${tienda.slug}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={() => navigate(`${bp || "/"}`)} />
     </div>
   );
 }

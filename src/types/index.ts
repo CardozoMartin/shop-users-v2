@@ -2,10 +2,11 @@ export interface TemaConfig {
   colorAcento?: string;
   modoOscuro?: boolean;
   navbarStyle?: string;
+  navbarVariante?: 'CLASICO' | 'PILL';
   heroTitulo?: string;
   heroSubtitulo?: string;
   heroCtaTexto?: string;
-  tipoSeccionHero?: 'HERO_FIJO' | 'CARRUSEL';
+  tipoSeccionHero?: 'HERO_FIJO' | 'CARRUSEL' | 'GALERIA';
   intervaloCarrusel?: number;
   seccionesVisibles?: Record<string, boolean>;
   bannerPromoActivo?: boolean;

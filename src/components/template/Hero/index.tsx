@@ -1,5 +1,6 @@
 import type { Tienda } from '../../../types';
 import Carrusel from './Carrusel';
+import GaleriaExpandible from './GaleriaExpandible';
 
 interface Props {
   tienda: Tienda;
@@ -25,6 +26,18 @@ export default function Hero({ tienda, acento, onScrollTo }: Props) {
       <Carrusel
         slides={slides}
         intervalo={tema.intervaloCarrusel ?? 5000}
+        acento={acento}
+        titulo={tema.heroTitulo}
+        subtitulo={tema.heroSubtitulo}
+      />
+    );
+  }
+
+  // Modo galería expandible: reusa las imágenes del carrusel.
+  if (tipo === 'GALERIA' && slides.length > 0) {
+    return (
+      <GaleriaExpandible
+        slides={slides}
         acento={acento}
         titulo={tema.heroTitulo}
         subtitulo={tema.heroSubtitulo}

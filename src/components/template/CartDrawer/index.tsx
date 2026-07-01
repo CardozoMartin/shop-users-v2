@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCarritoStore } from '../../../store/carrito';
 import type { CarritoItem } from '../../../types';
+import { basePathTienda } from '../../../utils/dominio';
 
 interface Props {
   acento: string;
@@ -18,10 +19,11 @@ export default function CartDrawer({ acento, isDark, onActualizar, onEliminar }:
   const { carrito, isOpen, cerrarCarrito } = useCarritoStore();
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
+  const bp = basePathTienda(slug ?? '');
 
   const irACheckout = () => {
     cerrarCarrito();
-    navigate(`/${slug}/checkout`);
+    navigate(`${bp}/checkout`);
   };
   const bg = isDark ? '#1a1a1a' : '#ffffff';
   const txt = isDark ? '#f3f4f6' : '#111827';

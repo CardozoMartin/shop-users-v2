@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getTiendaBySlug,
+  getTiendaByDominio,
   getProductosDestacados,
   getProductosNormales,
   getProductos,
@@ -25,6 +26,18 @@ export const useTienda = (slug: string) =>
     queryKey: ['tienda', slug],
     queryFn: () => getTiendaBySlug(slug),
     enabled: !!slug,
+    staleTime: 1000 * 60 * 5,
+  });
+
+// Resuelve la tienda según el contexto:
+// - Si estamos en un dominio propio (www.mitienda.com) → busca por dominio.
+// - Si estamos en la plataforma (netlify/localhost) → busca por el slug de la URL.
+export const useTiendaActual = (slug: string, dominioPropio: string | null) =>
+  useQuery({
+    queryKey: dominioPropio ? ['tienda-dominio', dominioPropio] : ['tienda', slug],
+    queryFn: () =>
+      dominioPropio ? getTiendaByDominio(dominioPropio) : getTiendaBySlug(slug),
+    enabled: dominioPropio ? !!dominioPropio : !!slug,
     staleTime: 1000 * 60 * 5,
   });
 

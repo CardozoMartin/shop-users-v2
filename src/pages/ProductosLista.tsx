@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Tienda } from '../types';
@@ -31,6 +32,7 @@ const LIMITE = 12;
 
 export default function ProductosLista({ tienda }: Props) {
   const navigate = useNavigate();
+  const bp = basePathTienda(tienda.slug);
   const c = resolveColors(tienda);
 
   // Estado de filtros
@@ -92,7 +94,7 @@ export default function ProductosLista({ tienda }: Props) {
         cartCount={cartCount}
         acento={c.acento}
         onCartClick={abrirCarrito}
-        onScrollTo={(id) => navigate(`/${tienda.slug}#${id}`)}
+        onScrollTo={(id) => navigate(`${bp || "/"}#${id}`)}
       />
 
       <main className="max-w-screen-xl mx-auto px-6 md:px-12 py-10 min-h-[60vh]">
@@ -248,7 +250,7 @@ export default function ProductosLista({ tienda }: Props) {
         </div>
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={(id) => navigate(`/${tienda.slug}#${id}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={(id) => navigate(`${bp || "/"}#${id}`)} />
 
       <CartDrawer
         acento={c.acento}

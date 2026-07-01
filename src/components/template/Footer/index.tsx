@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Tienda } from '../../../types';
+import { basePathTienda } from '../../../utils/dominio';
 
 interface Props {
   tienda: Tienda;
@@ -10,17 +11,19 @@ interface Props {
 export default function Footer({ tienda, acento, onScrollTo }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
-  const enHome = location.pathname === `/${tienda.slug}` || location.pathname === `/${tienda.slug}/`;
+  const bp = basePathTienda(tienda.slug);
+  const home = bp || '/';
+  const enHome = location.pathname === home || location.pathname === `${bp}/`;
 
   const irAInicio = () => {
     if (enHome) onScrollTo('inicio');
-    else navigate(`/${tienda.slug}`);
+    else navigate(home);
   };
 
   const links = [
     { label: 'Inicio', onClick: irAInicio },
-    { label: 'Productos', onClick: () => navigate(`/${tienda.slug}/productos`) },
-    { label: 'Nosotros', onClick: () => navigate(`/${tienda.slug}/nosotros`) },
+    { label: 'Productos', onClick: () => navigate(`${bp}/productos`) },
+    { label: 'Nosotros', onClick: () => navigate(`${bp}/nosotros`) },
   ];
 
   const igUser = tienda.instagram ? tienda.instagram.replace(/^@/, '') : '';

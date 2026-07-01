@@ -7,6 +7,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+https://da1.jhservices.com.ar/api/v1
+
 node_modules
 dist
 dist-ssr

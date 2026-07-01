@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import type { Producto } from '../../../types';
 import { calcularPrecio, fmtPrecio } from '../../../utils/precio';
+import { basePathTienda } from '../../../utils/dominio';
 
 interface Props {
   producto: Producto;
@@ -12,12 +13,13 @@ interface Props {
 
 export default function ProductCard({ producto, acento, destacado }: Props) {
   const { slug } = useParams<{ slug: string }>();
+  const bp = basePathTienda(slug ?? '');
   const imagen = producto.imagenPrincipalUrl || producto.imagenes?.[0]?.url;
   const precio = calcularPrecio(producto);
 
   return (
     <Link
-      to={`/${slug}/producto/${producto.id}`}
+      to={`${bp}/producto/${producto.id}`}
       className="group w-full cursor-pointer block"
     >
       <div className="relative">

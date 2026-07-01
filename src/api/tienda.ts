@@ -35,6 +35,12 @@ export const getTiendaBySlug = async (slug: string): Promise<Tienda> => {
   return data.datos;
 };
 
+// Resuelve la tienda a partir de un dominio propio (ej: www.mitienda.com).
+export const getTiendaByDominio = async (host: string): Promise<Tienda> => {
+  const { data } = await api.get('/tiendas/por-dominio', { params: { host } });
+  return data.datos;
+};
+
 export const getProductosDestacados = async (tiendaId: number): Promise<Producto[]> => {
   const { data } = await api.get(`/tiendas/${tiendaId}/productos/destacados`, {
     params: { limite: 12 },

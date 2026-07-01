@@ -62,23 +62,24 @@ export default function Carrusel({ slides, intervalo = 5000, acento, titulo, sub
           </button>
         )}
 
-        {/* Slider con fade — imágenes apiladas */}
+        {/* Slider con slide horizontal — track que se desliza con translateX */}
         <div
-          className="w-full max-w-5xl overflow-hidden relative rounded-xl shadow-sm"
-          style={{ aspectRatio: '21/9' }}
+          className="w-full max-w-6xl overflow-hidden relative rounded-xl shadow-sm"
+          style={{ aspectRatio: '16/9' }}
         >
-          {slides.map((slide, i) => (
-            <img
-              key={slide.id ?? i}
-              src={slide.url}
-              alt={slide.titulo || `Slide ${i + 1}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{
-                opacity: i === current ? 1 : 0,
-                transition: 'opacity 900ms ease-in-out',
-              }}
-            />
-          ))}
+          <div
+            className="flex h-full transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${current * 100}%)` }}
+          >
+            {slides.map((slide, i) => (
+              <img
+                key={slide.id ?? i}
+                src={slide.url}
+                alt={slide.titulo || `Slide ${i + 1}`}
+                className="w-full h-full object-contain flex-shrink-0"
+              />
+            ))}
+          </div>
         </div>
 
         {/* Flecha siguiente */}

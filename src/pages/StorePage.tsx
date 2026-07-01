@@ -1,5 +1,6 @@
 import { useParams, Routes, Route } from 'react-router-dom';
-import { useTienda } from '../hooks/useTienda';
+import { useTiendaActual } from '../hooks/useTienda';
+import { dominioPropioActual } from '../utils/dominio';
 import { useDocumentHead } from '../hooks/useDocumentHead';
 import Template from '../components/template';
 import ProductoDetalle from './ProductoDetalle';
@@ -42,7 +43,10 @@ function NotFound() {
 
 export default function StorePage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: tienda, isLoading, isError } = useTienda(slug ?? '');
+  // Si entramos por un dominio propio (www.mitienda.com) resolvemos por dominio;
+  // si no, por el slug de la URL como siempre.
+  const dominioPropio = dominioPropioActual();
+  const { data: tienda, isLoading, isError } = useTiendaActual(slug ?? '', dominioPropio);
 
   // Title y favicon dinámicos según la tienda
   useDocumentHead(tienda);

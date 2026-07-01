@@ -1,3 +1,4 @@
+import { basePathTienda } from '../utils/dominio';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Tienda, ProductoVariante } from '../types';
@@ -32,9 +33,10 @@ function fechaCorta(iso: string) {
 }
 
 export default function ProductoDetalle({ tienda }: Props) {
-  const { productoId } = useParams<{ productoId: string }>();
+  const { productoId, slug } = useParams<{ productoId: string; slug: string }>();
   const navigate = useNavigate();
   const c = resolveColors(tienda);
+  const bp = basePathTienda(slug ?? tienda.slug ?? '');
 
   const { data: producto, isLoading, isError } = useProducto(tienda.id, Number(productoId));
   const { carrito, agregar, actualizar, eliminar } = useCarrito(tienda.id);
@@ -58,6 +60,7 @@ export default function ProductoDetalle({ tienda }: Props) {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [variante, setVariante] = useState<ProductoVariante | null>(null);
   const [cantidad, setCantidad] = useState(1);
+  const [descExpandida, setDescExpandida] = useState(false);
 
   const cssVars = {
     '--s-bg': c.bg, '--s-txt': c.isDark ? '#f1f5f9' : '#1d293d',
@@ -93,7 +96,7 @@ export default function ProductoDetalle({ tienda }: Props) {
         cartCount={cartCount}
         acento={c.acento}
         onCartClick={abrirCarrito}
-        onScrollTo={(id) => navigate(`/${tienda.slug}#${id}`)}
+        onScrollTo={(id) => navigate(`${bp || "/"}#${id}`)}
       />
 
       <main className="max-w-6xl w-full mx-auto px-6 py-10 min-h-[60vh]">
@@ -115,15 +118,15 @@ export default function ProductoDetalle({ tienda }: Props) {
           <div className="py-28 text-center">
             <p className="text-5xl mb-4">📦</p>
             <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--s-txt)' }}>Producto no encontrado</h1>
-            <Link to={`/${tienda.slug}`} className="text-sm underline" style={{ color: c.acento }}>Volver a la tienda</Link>
+            <Link to={`${bp || "/"}`} className="text-sm underline" style={{ color: c.acento }}>Volver a la tienda</Link>
           </div>
         ) : (
           <>
             {/* Breadcrumb */}
             <p className="text-sm mb-6" style={{ color: 'var(--s-muted)' }}>
-              <Link to={`/${tienda.slug}`} className="hover:underline">Inicio</Link>
+              <Link to={`${bp || "/"}`} className="hover:underline">Inicio</Link>
               {' / '}
-              <Link to={`/${tienda.slug}#productos`} className="hover:underline">Productos</Link>
+              <Link to={`${bp || "/"}#productos`} className="hover:underline">Productos</Link>
               {producto.categoria && <>{' / '}<span>{producto.categoria.nombre}</span></>}
               {' / '}
               <span style={{ color: c.acento }}>{producto.nombre}</span>
@@ -131,7 +134,7 @@ export default function ProductoDetalle({ tienda }: Props) {
 
             <div className="flex flex-col md:flex-row gap-10 lg:gap-16">
               {/* Galería */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 md:sticky md:top-6 md:self-start">
                 {galeria.length > 1 && (
                   <div className="flex flex-col gap-3">
                     {galeria.map((img, i) => (
@@ -227,7 +230,20 @@ export default function ProductoDetalle({ tienda }: Props) {
                 {producto.descripcion && (
                   <div className="mt-6">
                     <p className="text-base font-medium mb-1" style={{ color: 'var(--s-txt)' }}>Descripción</p>
-                    <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--s-muted)' }}>{producto.descripcion}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--s-muted)' }}>
+                      {producto.descripcion.length > 200 && !descExpandida
+                        ? `${producto.descripcion.slice(0, 200).trimEnd()}…`
+                        : producto.descripcion}
+                    </p>
+                    {producto.descripcion.length > 200 && (
+                      <button
+                        onClick={() => setDescExpandida((v) => !v)}
+                        className="text-sm font-medium mt-1 border-none bg-transparent cursor-pointer p-0 hover:underline"
+                        style={{ color: c.acento }}
+                      >
+                        {descExpandida ? 'Ver menos' : 'Ver descripción'}
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -397,7 +413,7 @@ export default function ProductoDetalle({ tienda }: Props) {
         )}
       </main>
 
-      <Footer tienda={tienda} acento={c.acento} onScrollTo={(id) => navigate(`/${tienda.slug}#${id}`)} />
+      <Footer tienda={tienda} acento={c.acento} onScrollTo={(id) => navigate(`${bp || "/"}#${id}`)} />
 
       <CartDrawer
         acento={c.acento}
