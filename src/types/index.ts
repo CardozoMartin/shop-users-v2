@@ -3,6 +3,7 @@ export interface TemaConfig {
   modoOscuro?: boolean;
   navbarStyle?: string;
   navbarVariante?: 'CLASICO' | 'PILL';
+  footerVariante?: 'CENTRADO' | 'COLUMNAS';
   heroTitulo?: string;
   heroSubtitulo?: string;
   heroCtaTexto?: string;
