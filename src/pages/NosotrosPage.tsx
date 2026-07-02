@@ -2,13 +2,15 @@ import { basePathTienda } from '../utils/dominio';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Tienda } from '../types';
-import { useResenasTienda, useResenasEstadisticas, useCarrito } from '../hooks/useTienda';
+import { useResenasTienda, useResenasEstadisticas, useCarrito, useCrearResenaTienda } from '../hooks/useTienda';
 import { useCarritoStore } from '../store/carrito';
+import { useAuthStore } from '../store/auth';
 import Navbar from '../components/template/Navbar';
 import Footer from '../components/template/Footer';
 import CartDrawer from '../components/template/CartDrawer';
 import AboutUs from '../components/template/AboutUs';
 import Estrellas from '../components/template/Estrellas';
+import FormResena from '../components/template/FormResena';
 
 interface Props {
   tienda: Tienda;
@@ -41,6 +43,9 @@ export default function NosotrosPage({ tienda }: Props) {
 
   const resenas = resenasData?.datos ?? [];
   const totalPaginas = resenasData?.totalPaginas ?? 1;
+
+  const cliente = useAuthStore((s) => s.cliente);
+  const crearResena = useCrearResenaTienda(tienda.id);
 
   const cssVars = {
     '--s-bg': c.bg, '--s-txt': c.isDark ? '#f1f5f9' : '#1d293d',
@@ -110,6 +115,22 @@ export default function NosotrosPage({ tienda }: Props) {
                 </div>
               </div>
             )}
+
+            {/* Formulario para opinar sobre la tienda */}
+            <div className="mb-8 max-w-xl">
+              <FormResena
+                acento={c.acento}
+                logueado={!!cliente}
+                loginHref={`${bp}/cuenta`}
+                isSaving={crearResena.isPending}
+                onSubmit={(data) =>
+                  crearResena.mutateAsync({
+                    calificacion: data.calificacion,
+                    comentario: data.comentario,
+                  })
+                }
+              />
+            </div>
 
             {/* Lista de reseñas */}
             {cargandoResenas ? (

@@ -2,13 +2,15 @@ import { basePathTienda } from '../utils/dominio';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Tienda, ProductoVariante } from '../types';
-import { useProducto, useCarrito, useResenasProducto, useProductosRelacionados } from '../hooks/useTienda';
+import { useProducto, useCarrito, useResenasProducto, useProductosRelacionados, useCrearResenaProducto } from '../hooks/useTienda';
 import { useCarritoStore } from '../store/carrito';
+import { useAuthStore } from '../store/auth';
 import Navbar from '../components/template/Navbar';
 import Footer from '../components/template/Footer';
 import CartDrawer from '../components/template/CartDrawer';
 import ProductCard from '../components/template/Productos/ProductCard';
 import Estrellas from '../components/template/Estrellas';
+import FormResena from '../components/template/FormResena';
 import { calcularPrecio } from '../utils/precio';
 
 interface Props {
@@ -45,6 +47,9 @@ export default function ProductoDetalle({ tienda }: Props) {
   const { data: relacionados } = useProductosRelacionados(tienda.id, Number(productoId), producto?.categoria?.id);
   const { data: resenasData } = useResenasProducto(tienda.id, Number(productoId));
   const resenas = resenasData?.datos ?? [];
+
+  const cliente = useAuthStore((s) => s.cliente);
+  const crearResena = useCrearResenaProducto(tienda.id, Number(productoId));
 
   const cartCount = carrito?.items.reduce((acc, i) => acc + i.cantidad, 0) ?? 0;
 
@@ -354,11 +359,24 @@ export default function ProductoDetalle({ tienda }: Props) {
             </div>
 
             {/* ── Reseñas del producto ── */}
-            {resenas.length > 0 && (
-              <div className="mt-16 pt-12 border-t" style={{ borderColor: 'var(--s-border)' }}>
-                <h2 className="text-2xl font-medium mb-6" style={{ color: 'var(--s-txt)' }}>
-                  Opiniones sobre este producto
-                </h2>
+            <div className="mt-16 pt-12 border-t" style={{ borderColor: 'var(--s-border)' }}>
+              <h2 className="text-2xl font-medium mb-6" style={{ color: 'var(--s-txt)' }}>
+                Opiniones sobre este producto
+              </h2>
+
+              {/* Formulario para opinar */}
+              <div className="mb-8 max-w-xl">
+                <FormResena
+                  acento={c.acento}
+                  permiteImagen
+                  logueado={!!cliente}
+                  loginHref={`${bp}/cuenta`}
+                  isSaving={crearResena.isPending}
+                  onSubmit={(data) => crearResena.mutateAsync(data)}
+                />
+              </div>
+
+              {resenas.length > 0 && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   {resenas.map((r) => (
                     <div key={r.id} className="rounded-xl p-5" style={{ background: 'var(--s-surface)', border: '1px solid var(--s-border)' }}>
@@ -391,8 +409,8 @@ export default function ProductoDetalle({ tienda }: Props) {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* ── Productos relacionados ── */}
             {relacionados && relacionados.length > 0 && (

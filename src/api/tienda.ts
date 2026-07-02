@@ -115,13 +115,15 @@ export const getResenasTienda = async (
   params: { pagina?: number; limite?: number } = {}
 ): Promise<PaginatedResponse<ResenaTienda>> => {
   const { data } = await api.get(`/tiendas/${tiendaId}/resenas/`, { params });
-  const paginado = data.datos;
+  // Reseñas como array en data.datos y metadata en data.paginacion (con fallback anidado).
+  const arr = Array.isArray(data.datos) ? data.datos : (data.datos?.datos ?? []);
+  const meta = data.paginacion ?? data.datos ?? {};
   return {
-    datos: paginado?.datos ?? [],
-    total: paginado?.total ?? 0,
-    pagina: paginado?.pagina ?? 1,
-    limite: paginado?.limite ?? 10,
-    totalPaginas: paginado?.totalPaginas ?? 1,
+    datos: arr,
+    total: meta.total ?? arr.length,
+    pagina: meta.pagina ?? 1,
+    limite: meta.limite ?? 10,
+    totalPaginas: meta.totalPaginas ?? 1,
   };
 };
 
@@ -138,14 +140,44 @@ export const getResenasProducto = async (
   const { data } = await api.get(`/tiendas/${tiendaId}/productos/${productoId}/resenas/`, {
     params: { soloAprobadas: true, ...params },
   });
-  const paginado = data.datos;
+  // Este endpoint devuelve las reseñas como array en data.datos y la metadata
+  // aparte en data.paginacion. Contemplamos también el formato anidado por si acaso.
+  const arr = Array.isArray(data.datos) ? data.datos : (data.datos?.datos ?? []);
+  const meta = data.paginacion ?? data.datos ?? {};
   return {
-    datos: paginado?.datos ?? [],
-    total: paginado?.total ?? 0,
-    pagina: paginado?.pagina ?? 1,
-    limite: paginado?.limite ?? 10,
-    totalPaginas: paginado?.totalPaginas ?? 1,
+    datos: arr,
+    total: meta.total ?? arr.length,
+    pagina: meta.pagina ?? 1,
+    limite: meta.limite ?? 10,
+    totalPaginas: meta.totalPaginas ?? 1,
   };
+};
+
+// Crear reseña de TIENDA (solo texto + calificación). Requiere cliente logueado
+// (el token viaja automáticamente por el interceptor de api/base.ts).
+export const crearResenaTienda = async (
+  tiendaId: number,
+  payload: { calificacion: number; comentario?: string; autorNombre?: string }
+): Promise<ResenaTienda> => {
+  const { data } = await api.post(`/tiendas/${tiendaId}/resenas/`, payload);
+  return data.datos;
+};
+
+// Crear reseña de PRODUCTO (calificación + comentario + imagen opcional).
+// Usa multipart/form-data porque el endpoint acepta una imagen.
+export const crearResenaProducto = async (
+  productoId: number,
+  payload: { calificacion: number; comentario?: string; imagen?: File | null }
+): Promise<ResenaProducto> => {
+  const form = new FormData();
+  form.append('calificacion', String(payload.calificacion));
+  if (payload.comentario) form.append('comentario', payload.comentario);
+  if (payload.imagen) form.append('imagen', payload.imagen);
+
+  const { data } = await api.post(`/mis-productos/${productoId}/resenas/`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.datos;
 };
 
 export const getProductosRelacionados = async (

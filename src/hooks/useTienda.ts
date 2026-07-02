@@ -10,6 +10,8 @@ import {
   getResenasTienda,
   getResenasEstadisticas,
   getResenasProducto,
+  crearResenaTienda,
+  crearResenaProducto,
   getProductosRelacionados,
   crearPedido,
   type FiltrosProductos,
@@ -99,6 +101,32 @@ export const useResenasEstadisticas = (tiendaId: number) =>
     queryFn: () => getResenasEstadisticas(tiendaId),
     enabled: !!tiendaId,
   });
+
+// Crear reseña de tienda. Al terminar, refresca la lista y las estadísticas.
+// La reseña queda pendiente de aprobación, así que puede no aparecer al instante.
+export const useCrearResenaTienda = (tiendaId: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { calificacion: number; comentario?: string; autorNombre?: string }) =>
+      crearResenaTienda(tiendaId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['resenas-tienda', tiendaId] });
+      qc.invalidateQueries({ queryKey: ['resenas-stats', tiendaId] });
+    },
+  });
+};
+
+// Crear reseña de producto (con imagen opcional). Refresca la lista del producto.
+export const useCrearResenaProducto = (tiendaId: number, productoId: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { calificacion: number; comentario?: string; imagen?: File | null }) =>
+      crearResenaProducto(productoId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['resenas-producto', tiendaId, productoId] });
+    },
+  });
+};
 
 export const useCategorias = (tiendaId: number) =>
   useQuery({
