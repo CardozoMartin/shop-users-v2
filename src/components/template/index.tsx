@@ -2,9 +2,11 @@ import { useState } from 'react';
 import type { Tienda, Producto } from '../../types';
 import { useCarrito } from '../../hooks/useTienda';
 import { useCarritoStore } from '../../store/carrito';
+import { useFuenteKit } from '../../hooks/useFuenteKit';
 import Navbar from './Navbar';
 import Hero from './Hero';
 import Destacados from './Destacados';
+import CategoriasDestacadas from './CategoriasDestacadas';
 import BannerPromo from './BannerPromo';
 import PopupModal from './PopupModal';
 import Productos from './Productos';
@@ -36,11 +38,15 @@ function scrollToSection(id: string) {
 
 export default function Template({ tienda }: Props) {
   const c = resolveColors(tienda);
+  useFuenteKit(tienda.temaConfig?.fuenteKit);
   const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
   const { carrito, agregar, actualizar, eliminar } = useCarrito(tienda.id);
   const { abrirCarrito } = useCarritoStore();
 
   const cartCount = carrito?.items.reduce((acc, i) => acc + i.cantidad, 0) ?? 0;
+
+  const catDestActivas = tienda.temaConfig?.categoriasDestacadasActivas ?? false;
+  const catDestPosicion = tienda.temaConfig?.categoriasDestacadasPosicion ?? 'ANTES';
 
   const cssVars = {
     '--s-bg': c.bg,
@@ -68,7 +74,15 @@ export default function Template({ tienda }: Props) {
           onScrollTo={scrollToSection}
         />
 
+        {catDestActivas && catDestPosicion === 'ANTES' && (
+          <CategoriasDestacadas categorias={tienda.categoriasDestacadas ?? []} acento={c.acento} />
+        )}
+
         <Destacados tiendaId={tienda.id} acento={c.acento} />
+
+        {catDestActivas && catDestPosicion === 'DESPUES' && (
+          <CategoriasDestacadas categorias={tienda.categoriasDestacadas ?? []} acento={c.acento} />
+        )}
 
         <BannerPromo tienda={tienda} acento={c.acento} />
 

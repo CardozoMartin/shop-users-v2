@@ -4,6 +4,7 @@ export interface TemaConfig {
   navbarStyle?: string;
   navbarVariante?: 'CLASICO' | 'PILL';
   footerVariante?: 'CENTRADO' | 'COLUMNAS';
+  fuenteKit?: 'MODERNO' | 'EDITORIAL' | 'IMPACTO' | 'MINIMAL';
   heroTitulo?: string;
   heroSubtitulo?: string;
   heroCtaTexto?: string;
@@ -16,6 +17,17 @@ export interface TemaConfig {
   bannerPromoImagenUrl?: string | null;
   bannerPromoLinkUrl?: string | null;
   bannerPromoCtaTexto?: string | null;
+  categoriasDestacadasActivas?: boolean;
+  categoriasDestacadasPosicion?: 'ANTES' | 'DESPUES';
+}
+
+export interface CategoriaDestacada {
+  id: number;
+  imagenUrl: string;
+  titulo: string;
+  linkUrl: string;
+  orden: number;
+  activa: boolean;
 }
 
 export interface HeroSlide {
@@ -136,6 +148,7 @@ export interface Tienda {
   activa?: boolean;
   temaConfig?: TemaConfig;
   carrusel?: HeroSlide[];
+  categoriasDestacadas?: CategoriaDestacada[];
   aboutUs?: AboutUs | null;
   marqueeItems?: MarqueeItem[];
   metodosPago?: MetodoPago[];

@@ -77,7 +77,7 @@ export default function NavbarClasico({ tienda, cartCount, acento, onCartClick, 
         {tienda.logoUrl ? (
           <img src={tienda.logoUrl} alt={tienda.nombre} className="h-9 w-auto object-contain" />
         ) : (
-          <span className="text-xl font-semibold tracking-tight text-black">
+          <span className="s-display text-xl font-semibold tracking-tight text-black">
             {tienda.nombre}
           </span>
         )}

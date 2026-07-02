@@ -81,7 +81,7 @@ export default function NavbarPill({ tienda, cartCount, acento, onCartClick, onS
         {tienda.logoUrl ? (
           <img src={tienda.logoUrl} alt={tienda.nombre} className="h-9 w-auto object-contain" />
         ) : (
-          <span className="text-xl font-semibold tracking-tight text-zinc-900">{tienda.nombre}</span>
+          <span className="s-display text-xl font-semibold tracking-tight text-zinc-900">{tienda.nombre}</span>
         )}
       </button>
 

@@ -65,7 +65,7 @@ export default function ProductCard({ producto, acento, destacado }: Props) {
         )}
       </div>
 
-      <p className="text-sm mt-2" style={{ color: 'var(--s-txt)' }}>{producto.nombre}</p>
+      <p className="s-display text-base font-semibold mt-2 leading-snug" style={{ color: 'var(--s-txt)' }}>{producto.nombre}</p>
 
       {/* Precio viejo tachado */}
       {precio.anterior && (
