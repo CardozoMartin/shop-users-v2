@@ -10,6 +10,7 @@ import CheckoutPage from './CheckoutPage';
 import AuthPage from './AuthPage';
 import MiCuentaPage from './MiCuentaPage';
 import PagoRetornoPage from './PagoRetornoPage';
+import PaginaLegalView from './PaginaLegalView';
 
 function Skeleton() {
   return (
@@ -71,6 +72,9 @@ export default function StorePage() {
       <Route path="mi-cuenta" element={<MiCuentaPage tienda={tienda} />} />
       <Route path="pedido/:pedidoId/:resultado" element={<PagoRetornoPage tienda={tienda} />} />
       <Route path="producto/:productoId" element={<ProductoDetalle tienda={tienda} />} />
+      <Route path="terminos" element={<PaginaLegalView tienda={tienda} tipo="TERMINOS" />} />
+      <Route path="cambios" element={<PaginaLegalView tienda={tienda} tipo="CAMBIOS" />} />
+      <Route path="privacidad" element={<PaginaLegalView tienda={tienda} tipo="PRIVACIDAD" />} />
       <Route path="*" element={<Template tienda={tienda} />} />
     </Routes>
   );

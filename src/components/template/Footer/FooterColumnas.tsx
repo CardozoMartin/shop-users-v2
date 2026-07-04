@@ -1,6 +1,15 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Tienda } from '../../../types';
 import { basePathTienda } from '../../../utils/dominio';
+import BotonArrepentimiento from '../BotonArrepentimiento';
+import DatosLegales from '../DatosLegales';
+import { usePaginasLegalesActivas } from '../../../hooks/useTienda';
+
+const RUTA_LEGAL: Record<string, string> = {
+  TERMINOS: 'terminos',
+  CAMBIOS: 'cambios',
+  PRIVACIDAD: 'privacidad',
+};
 
 interface Props {
   tienda: Tienda;
@@ -14,6 +23,8 @@ export default function FooterColumnas({ tienda, acento, onScrollTo }: Props) {
   const bp = basePathTienda(tienda.slug);
   const home = bp || '/';
   const enHome = location.pathname === home || location.pathname === `${bp}/`;
+
+  const { data: paginasLegales = [] } = usePaginasLegalesActivas(tienda.id);
 
   const irAInicio = () => {
     if (enHome) onScrollTo('inicio');
@@ -108,11 +119,31 @@ export default function FooterColumnas({ tienda, acento, onScrollTo }: Props) {
         )}
       </div>
 
-      {/* Copyright */}
+      {/* Links legales + botón de arrepentimiento (obligatorio) */}
       <div className="border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs" style={{ color: 'var(--s-muted)' }}>
-          <span>{tienda.nombre} © {new Date().getFullYear()}. Todos los derechos reservados.</span>
-          <span style={{ color: acento }}>Hecho con amor ✦</span>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          {paginasLegales.map((p) => (
+            <button
+              key={p.tipo}
+              onClick={() => navigate(`${bp}/${RUTA_LEGAL[p.tipo] ?? ''}`)}
+              className="text-xs cursor-pointer border-none bg-transparent transition-colors hover:opacity-60"
+              style={{ color: 'var(--s-muted)' }}
+            >
+              {p.titulo}
+            </button>
+          ))}
+          <BotonArrepentimiento tiendaId={tienda.id} acento={acento} />
+        </div>
+      </div>
+
+      {/* Copyright + datos legales */}
+      <div className="border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-2 text-xs" style={{ color: 'var(--s-muted)' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>{tienda.nombre} © {new Date().getFullYear()}. Todos los derechos reservados.</span>
+            <span style={{ color: acento }}>Hecho con amor ✦</span>
+          </div>
+          <DatosLegales tienda={tienda} />
         </div>
       </div>
     </footer>

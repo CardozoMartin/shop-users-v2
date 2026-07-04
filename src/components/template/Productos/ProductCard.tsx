@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import type { Producto } from '../../../types';
 import { calcularPrecio, fmtPrecio } from '../../../utils/precio';
 import { basePathTienda } from '../../../utils/dominio';
+import { colorAHex } from '../../../utils/colores';
 
 interface Props {
   producto: Producto;
@@ -16,6 +17,23 @@ export default function ProductCard({ producto, acento, destacado }: Props) {
   const bp = basePathTienda(slug ?? '');
   const imagen = producto.imagenPrincipalUrl || producto.imagenes?.[0]?.url;
   const precio = calcularPrecio(producto);
+
+  const variantes = producto.variantes ?? [];
+  const tieneVariantes = variantes.length > 0;
+
+  // Variantes con stock real
+  const variantesConStock = variantes.filter(
+    (v) => (v.stock ?? 0) > 0 && v.disponible !== false
+  );
+
+  // Colores y talles disponibles (para chips en la tarjeta)
+  const colores = [...new Set(variantesConStock.map((v) => v.color).filter(Boolean))] as string[];
+  const talles = [...new Set(variantesConStock.map((v) => v.talle).filter(Boolean))] as string[];
+
+  // Sin stock: con variantes → ninguna disponible; sin variantes → stock del producto
+  const sinStock = tieneVariantes
+    ? variantesConStock.length === 0
+    : (producto.stock ?? 0) <= 0;
 
   return (
     <Link
@@ -36,8 +54,8 @@ export default function ProductCard({ producto, acento, destacado }: Props) {
           </span>
         )}
 
-        {/* Badge de descuento */}
-        {precio.descuento && (
+        {/* Badge de descuento (oculto si no hay stock, para no competir con el badge de agotado) */}
+        {precio.descuento && !sinStock && (
           <span
             className="absolute top-2 right-2 z-10 px-2 py-1 rounded-full text-white text-xs font-bold shadow-md"
             style={{ background: '#16a34a', fontSize: 11 }}
@@ -46,12 +64,25 @@ export default function ProductCard({ producto, acento, destacado }: Props) {
           </span>
         )}
 
+        {/* Badge sin stock */}
+        {sinStock && (
+          <span
+            className="absolute top-2 right-2 z-10 px-2.5 py-1 rounded-full text-white text-xs font-semibold shadow-md"
+            style={{ background: '#6b7280', fontSize: 11 }}
+          >
+            Sin stock
+          </span>
+        )}
+
         {imagen ? (
           <img
             className="rounded-lg w-full group-hover:shadow-xl hover:-translate-y-0.5 duration-300 transition-all h-48 sm:h-72 object-contain bg-white p-2"
             src={imagen}
             alt={producto.nombre}
-            style={destacado ? { boxShadow: `0 0 0 2px ${acento}` } : undefined}
+            style={{
+              ...(destacado ? { boxShadow: `0 0 0 2px ${acento}` } : {}),
+              ...(sinStock ? { opacity: 0.55, filter: 'grayscale(0.4)' } : {}),
+            }}
           />
         ) : (
           <div
@@ -66,6 +97,48 @@ export default function ProductCard({ producto, acento, destacado }: Props) {
       </div>
 
       <p className="s-display text-base font-semibold mt-2 leading-snug" style={{ color: 'var(--s-txt)' }}>{producto.nombre}</p>
+
+      {/* Swatches de colores disponibles */}
+      {colores.length > 0 && (
+        <div className="flex items-center gap-1 mt-1.5">
+          {colores.slice(0, 5).map((col) => {
+            const hex = colorAHex(col);
+            return hex ? (
+              <span
+                key={col}
+                title={col}
+                className="w-3.5 h-3.5 rounded-full"
+                style={{ background: hex, border: '1px solid rgba(0,0,0,0.15)' }}
+              />
+            ) : (
+              <span key={col} className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--s-surface)', color: 'var(--s-muted)' }}>
+                {col}
+              </span>
+            );
+          })}
+          {colores.length > 5 && (
+            <span className="text-[10px]" style={{ color: 'var(--s-muted)' }}>+{colores.length - 5}</span>
+          )}
+        </div>
+      )}
+
+      {/* Talles disponibles */}
+      {talles.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1 mt-1.5">
+          {talles.slice(0, 6).map((t) => (
+            <span
+              key={t}
+              className="text-[10px] leading-none px-1.5 py-1 rounded border"
+              style={{ borderColor: 'var(--s-border)', color: 'var(--s-muted)' }}
+            >
+              {t}
+            </span>
+          ))}
+          {talles.length > 6 && (
+            <span className="text-[10px]" style={{ color: 'var(--s-muted)' }}>+{talles.length - 6}</span>
+          )}
+        </div>
+      )}
 
       {/* Precio viejo tachado */}
       {precio.anterior && (

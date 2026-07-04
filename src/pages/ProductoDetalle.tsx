@@ -1,5 +1,5 @@
 import { basePathTienda } from '../utils/dominio';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Tienda, ProductoVariante } from '../types';
 import { useProducto, useCarrito, useResenasProducto, useProductosRelacionados, useCrearResenaProducto } from '../hooks/useTienda';
@@ -12,6 +12,7 @@ import ProductCard from '../components/template/Productos/ProductCard';
 import Estrellas from '../components/template/Estrellas';
 import FormResena from '../components/template/FormResena';
 import { calcularPrecio } from '../utils/precio';
+import { colorAHex } from '../utils/colores';
 
 interface Props {
   tienda: Tienda;
@@ -63,9 +64,50 @@ export default function ProductoDetalle({ tienda }: Props) {
   }, [producto]);
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [variante, setVariante] = useState<ProductoVariante | null>(null);
+  const [varianteManual, setVarianteManual] = useState<ProductoVariante | null>(null);
+  const [colorSel, setColorSel] = useState<string | null>(null);
+  const [talleSel, setTalleSel] = useState<string | null>(null);
   const [cantidad, setCantidad] = useState(1);
   const [descExpandida, setDescExpandida] = useState(false);
+  const [guiaAbierta, setGuiaAbierta] = useState(false);
+
+  const variantes = useMemo(() => producto?.variantes ?? [], [producto]);
+  // Modo estructurado: todas las variantes tienen color y/o talle → selectores separados
+  const estructurado = variantes.length > 0 && variantes.every((v) => v.color || v.talle);
+  const colores = useMemo(
+    () => [...new Set(variantes.map((v) => v.color).filter(Boolean))] as string[],
+    [variantes]
+  );
+  const talles = useMemo(
+    () => [...new Set(variantes.map((v) => v.talle).filter(Boolean))] as string[],
+    [variantes]
+  );
+
+  const seleccionCompleta = estructurado
+    ? (colores.length === 0 || !!colorSel) && (talles.length === 0 || !!talleSel)
+    : !!varianteManual;
+
+  // Variante efectiva: derivada de color+talle en modo estructurado, o elegida a mano
+  const variante: ProductoVariante | null = estructurado
+    ? seleccionCompleta
+      ? variantes.find(
+          (v) =>
+            (colores.length === 0 || v.color === colorSel) &&
+            (talles.length === 0 || v.talle === talleSel)
+        ) ?? null
+      : null
+    : varianteManual;
+
+  // Selección completa pero esa combinación no existe como variante
+  const combinacionInvalida = estructurado && seleccionCompleta && !variante;
+
+  const varianteAgotada = (v: ProductoVariante) => (v.stock ?? 0) <= 0 || v.disponible === false;
+
+  // Un color/talle está disponible si existe alguna variante con stock que lo incluya
+  const colorConStock = (color: string) =>
+    variantes.some((v) => v.color === color && !varianteAgotada(v) && (!talleSel || v.talle === talleSel));
+  const talleConStock = (talle: string) =>
+    variantes.some((v) => v.talle === talle && !varianteAgotada(v) && (!colorSel || v.color === colorSel));
 
   const cssVars = {
     '--s-bg': c.bg, '--s-txt': c.isDark ? '#f1f5f9' : '#1d293d',
@@ -73,8 +115,11 @@ export default function ProductoDetalle({ tienda }: Props) {
     '--s-surface': c.isDark ? '#1a1a2e' : '#f8f8f8', '--s-acento': c.acento,
   } as React.CSSProperties;
 
-  // Imagen mostrada: thumbnail elegido > imagen de variante > primera de galería
-  const imagenActual = thumbnail || variante?.imagenUrl || galeria[0];
+  // Imagen mostrada: thumbnail elegido > imagen de variante > imagen del color elegido > primera de galería
+  const imagenColorSel = estructurado && colorSel
+    ? variantes.find((v) => v.color === colorSel && v.imagenUrl)?.imagenUrl
+    : null;
+  const imagenActual = thumbnail || variante?.imagenUrl || imagenColorSel || galeria[0];
 
   const extra = Number(variante?.precioExtra ?? 0);
   const infoPrecio = producto ? calcularPrecio(producto) : { actual: 0, anterior: null, descuento: null };
@@ -82,10 +127,15 @@ export default function ProductoDetalle({ tienda }: Props) {
   const precioAnteriorFinal = infoPrecio.anterior != null ? infoPrecio.anterior + extra : null;
 
   // Stock efectivo (de variante si hay, si no del producto)
-  const stock = variante ? variante.stock ?? 0 : producto?.stock ?? 0;
-  const sinStock = stock <= 0 && (producto?.variantes?.length ? !!variante : true);
+  const stock = combinacionInvalida ? 0 : variante ? variante.stock ?? 0 : producto?.stock ?? 0;
+  const sinStock = combinacionInvalida || (stock <= 0 && (variantes.length ? !!variante : true));
 
-  const tieneVariantes = !!producto?.variantes?.length;
+  const tieneVariantes = variantes.length > 0;
+
+  // La cantidad nunca puede superar el stock disponible
+  useEffect(() => {
+    setCantidad((q) => Math.min(Math.max(1, q), Math.max(1, stock)));
+  }, [stock]);
 
   const agregarAlCarrito = () => {
     if (!producto) return;
@@ -145,7 +195,7 @@ export default function ProductoDetalle({ tienda }: Props) {
                     {galeria.map((img, i) => (
                       <button
                         key={i}
-                        onClick={() => { setThumbnail(img); setVariante(null); }}
+                        onClick={() => { setThumbnail(img); setVarianteManual(null); }}
                         className="border rounded overflow-hidden cursor-pointer w-20 h-20 flex-shrink-0 bg-white"
                         style={{ borderColor: imagenActual === img ? c.acento : 'var(--s-border)' }}
                       >
@@ -198,19 +248,110 @@ export default function ProductoDetalle({ tienda }: Props) {
                   ) : null}
                 </div>
 
-                {/* Variantes */}
-                {producto.variantes && producto.variantes.length > 0 && (
+                {/* Variantes — selectores separados si tienen color/talle estructurado */}
+                {tieneVariantes && estructurado ? (
+                  <div className="mt-6 space-y-4">
+                    {colores.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium mb-2" style={{ color: 'var(--s-txt)' }}>
+                          Color{colorSel ? <span style={{ color: 'var(--s-muted)' }}>: {colorSel}</span> : ''}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {colores.map((col) => {
+                            const activa = colorSel === col;
+                            const agotado = !colorConStock(col);
+                            const hex = colorAHex(col);
+                            return (
+                              <button
+                                key={col}
+                                disabled={agotado}
+                                onClick={() => {
+                                  setColorSel(activa ? null : col);
+                                  const vImg = variantes.find((v) => v.color === col && v.imagenUrl);
+                                  if (vImg) setThumbnail(null);
+                                }}
+                                className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full text-sm border transition-all disabled:opacity-40 disabled:line-through cursor-pointer"
+                                style={{
+                                  borderColor: activa ? c.acento : 'var(--s-border)',
+                                  background: activa ? 'var(--s-surface)' : 'transparent',
+                                  color: 'var(--s-txt)',
+                                }}
+                              >
+                                {hex && (
+                                  <span
+                                    className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center"
+                                    style={{
+                                      background: hex,
+                                      border: '1px solid rgba(0,0,0,0.12)',
+                                      boxShadow: activa ? `0 0 0 2px ${c.acento}` : 'none',
+                                    }}
+                                  >
+                                    {activa && (
+                                      <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        stroke={colorAHex(col) === '#ffffff' ? '#111' : '#fff'}
+                                        strokeWidth={3}
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                      </svg>
+                                    )}
+                                  </span>
+                                )}
+                                {col}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {talles.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium mb-2" style={{ color: 'var(--s-txt)' }}>
+                          Talle{talleSel ? <span style={{ color: 'var(--s-muted)' }}>: {talleSel}</span> : ''}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {talles.map((t) => {
+                            const activa = talleSel === t;
+                            const agotado = !talleConStock(t);
+                            return (
+                              <button
+                                key={t}
+                                disabled={agotado}
+                                onClick={() => setTalleSel(activa ? null : t)}
+                                className="min-w-[3rem] px-3 py-2 rounded-lg text-sm border transition-all disabled:opacity-40 disabled:line-through cursor-pointer"
+                                style={{
+                                  borderColor: activa ? c.acento : 'var(--s-border)',
+                                  background: activa ? c.acento : 'transparent',
+                                  color: activa ? '#fff' : 'var(--s-txt)',
+                                }}
+                              >
+                                {t}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {combinacionInvalida && (
+                      <p className="text-xs" style={{ color: '#dc2626' }}>
+                        Esa combinación no está disponible. Probá otro color o talle.
+                      </p>
+                    )}
+                  </div>
+                ) : tieneVariantes ? (
                   <div className="mt-6">
                     <p className="text-sm font-medium mb-2" style={{ color: 'var(--s-txt)' }}>Variantes</p>
                     <div className="flex flex-wrap gap-2">
-                      {producto.variantes.map((v) => {
-                        const activa = variante?.id === v.id;
-                        const agotada = (v.stock ?? 0) <= 0 || v.disponible === false;
+                      {variantes.map((v) => {
+                        const activa = varianteManual?.id === v.id;
+                        const agotada = varianteAgotada(v);
                         return (
                           <button
                             key={v.id}
                             disabled={agotada}
-                            onClick={() => { setVariante(activa ? null : v); if (v.imagenUrl) setThumbnail(null); }}
+                            onClick={() => { setVarianteManual(activa ? null : v); if (v.imagenUrl) setThumbnail(null); }}
                             className="px-4 py-2 rounded-full text-sm border transition-all disabled:opacity-40 disabled:line-through cursor-pointer"
                             style={{
                               borderColor: activa ? c.acento : 'var(--s-border)',
@@ -224,12 +365,32 @@ export default function ProductoDetalle({ tienda }: Props) {
                       })}
                     </div>
                   </div>
+                ) : null}
+
+                {/* Botón guía de talles */}
+                {producto.guiaTalles && (
+                  <button
+                    onClick={() => setGuiaAbierta(true)}
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium cursor-pointer border-none bg-transparent p-0 hover:underline"
+                    style={{ color: c.acento }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15M4.5 9h15m-15 6h15M3.75 4.5h16.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V5.25a.75.75 0 01.75-.75z" />
+                    </svg>
+                    Guía de talles
+                  </button>
                 )}
 
-                {/* Stock */}
-                <p className="text-sm mt-4" style={{ color: sinStock ? '#dc2626' : '#16a34a' }}>
-                  {sinStock ? 'Sin stock' : `${stock} disponibles`}
-                </p>
+                {/* Stock — en modo estructurado no se muestra hasta elegir color y talle */}
+                {estructurado && !seleccionCompleta ? (
+                  <p className="text-sm mt-4" style={{ color: 'var(--s-muted)' }}>
+                    Seleccioná {[colores.length > 0 && 'color', talles.length > 0 && 'talle'].filter(Boolean).join(' y ')} para ver disponibilidad
+                  </p>
+                ) : (
+                  <p className="text-sm mt-4" style={{ color: sinStock ? '#dc2626' : '#16a34a' }}>
+                    {sinStock ? 'Sin stock' : `${stock} disponibles`}
+                  </p>
+                )}
 
                 {/* Descripción */}
                 {producto.descripcion && (
@@ -268,7 +429,7 @@ export default function ProductoDetalle({ tienda }: Props) {
                   <div className="flex items-center border rounded-full" style={{ borderColor: 'var(--s-border)' }}>
                     <button onClick={() => setCantidad((q) => Math.max(1, q - 1))} className="px-4 py-2 text-lg cursor-pointer border-none bg-transparent" style={{ color: 'var(--s-txt)' }}>−</button>
                     <span className="px-2 text-sm" style={{ color: 'var(--s-txt)' }}>{cantidad}</span>
-                    <button onClick={() => setCantidad((q) => q + 1)} className="px-4 py-2 text-lg cursor-pointer border-none bg-transparent" style={{ color: 'var(--s-txt)' }}>+</button>
+                    <button onClick={() => setCantidad((q) => Math.min(q + 1, Math.max(1, stock)))} className="px-4 py-2 text-lg cursor-pointer border-none bg-transparent" style={{ color: 'var(--s-txt)' }}>+</button>
                   </div>
                   <button
                     onClick={agregarAlCarrito}
@@ -279,7 +440,9 @@ export default function ProductoDetalle({ tienda }: Props) {
                     {sinStock
                       ? 'Sin stock'
                       : tieneVariantes && !variante
-                        ? 'Elegí una variante'
+                        ? estructurado
+                          ? `Elegí ${[colores.length > 0 && 'color', talles.length > 0 && 'talle'].filter(Boolean).join(' y ')}`
+                          : 'Elegí una variante'
                         : agregar.isPending
                           ? 'Agregando...'
                           : 'Agregar al carrito'}
@@ -287,8 +450,10 @@ export default function ProductoDetalle({ tienda }: Props) {
                 </div>
 
                 {/* Variante requerida */}
-                {producto.variantes && producto.variantes.length > 0 && !variante && (
-                  <p className="text-xs mt-2" style={{ color: 'var(--s-muted)' }}>Tip: seleccioná una variante antes de agregar.</p>
+                {tieneVariantes && !variante && !combinacionInvalida && (
+                  <p className="text-xs mt-2" style={{ color: 'var(--s-muted)' }}>
+                    {estructurado ? 'Tip: seleccioná las opciones antes de agregar.' : 'Tip: seleccioná una variante antes de agregar.'}
+                  </p>
                 )}
 
                 {/* Métodos de pago y envío */}
@@ -439,6 +604,77 @@ export default function ProductoDetalle({ tienda }: Props) {
         onActualizar={(itemId, cant) => actualizar.mutate({ itemId, cantidad: cant })}
         onEliminar={(itemId) => eliminar.mutate(itemId)}
       />
+
+      {/* Modal guía de talles */}
+      {guiaAbierta && producto?.guiaTalles && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setGuiaAbierta(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl overflow-hidden max-h-[85vh] flex flex-col"
+            style={{ background: 'var(--s-bg)', border: '1px solid var(--s-border)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'var(--s-border)' }}>
+              <h3 className="text-base font-semibold" style={{ color: 'var(--s-txt)' }}>
+                {producto.guiaTalles.nombre}
+              </h3>
+              <button
+                onClick={() => setGuiaAbierta(false)}
+                className="p-1 cursor-pointer border-none bg-transparent"
+                style={{ color: 'var(--s-muted)' }}
+                aria-label="Cerrar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-5 overflow-auto">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr>
+                      {producto.guiaTalles.columnas.map((col, i) => (
+                        <th
+                          key={i}
+                          className="text-left font-semibold px-3 py-2 whitespace-nowrap"
+                          style={{ background: 'var(--s-surface)', color: 'var(--s-txt)', borderBottom: '1px solid var(--s-border)' }}
+                        >
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {producto.guiaTalles.filas.map((fila, i) => (
+                      <tr key={i}>
+                        {fila.map((cell, j) => (
+                          <td
+                            key={j}
+                            className="px-3 py-2 whitespace-nowrap"
+                            style={{ color: 'var(--s-txt)', borderBottom: '1px solid var(--s-border)' }}
+                          >
+                            {cell || '—'}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {producto.guiaTalles.nota && (
+                <p className="text-xs mt-4" style={{ color: 'var(--s-muted)' }}>
+                  {producto.guiaTalles.nota}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

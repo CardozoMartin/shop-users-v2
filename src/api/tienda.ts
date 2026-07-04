@@ -265,3 +265,51 @@ export const crearPreferenciaMP = async (tiendaId: number, pedidoId: number): Pr
   const { data } = await api.post(`/tiendas/${tiendaId}/pedidos/${pedidoId}/pagar`);
   return data.datos;
 };
+
+// ── Botón de arrepentimiento (Res. 424/2020) ──
+export interface RevocacionInput {
+  nombre: string;
+  email: string;
+  telefono?: string;
+  nroPedidoTexto?: string;
+  motivo?: string;
+}
+
+export interface RevocacionConstancia {
+  codigo: string;
+  creadoEn: string;
+  nombre: string;
+  email: string;
+}
+
+export const crearRevocacion = async (
+  tiendaId: number,
+  payload: RevocacionInput
+): Promise<RevocacionConstancia> => {
+  const { data } = await api.post(`/tiendas/${tiendaId}/revocaciones`, payload);
+  return data.datos;
+};
+
+// ── Páginas legales ──
+export type TipoLegal = 'TERMINOS' | 'PRIVACIDAD' | 'CAMBIOS';
+
+export interface PaginaLegal {
+  titulo: string;
+  contenido: string;
+  actualizadoEn: string;
+}
+
+export interface PaginaLegalItem {
+  tipo: TipoLegal;
+  titulo: string;
+}
+
+export const getPaginaLegal = async (tiendaId: number, tipo: TipoLegal): Promise<PaginaLegal> => {
+  const { data } = await api.get(`/tiendas/${tiendaId}/legal/${tipo}`);
+  return data.datos;
+};
+
+export const getPaginasLegalesActivas = async (tiendaId: number): Promise<PaginaLegalItem[]> => {
+  const { data } = await api.get(`/tiendas/${tiendaId}/legal`);
+  return data.datos;
+};

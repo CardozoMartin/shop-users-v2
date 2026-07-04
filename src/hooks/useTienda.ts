@@ -19,6 +19,9 @@ import {
   agregarAlCarrito,
   actualizarCantidad,
   eliminarDelCarrito,
+  getPaginaLegal,
+  getPaginasLegalesActivas,
+  type TipoLegal,
 } from '../api/tienda';
 import { useCarritoStore } from '../store/carrito';
 import type { CrearPedidoDto } from '../types';
@@ -86,6 +89,10 @@ export const useProducto = (tiendaId: number, productoId: number) =>
     queryKey: ['producto', tiendaId, productoId],
     queryFn: () => getProductoById(tiendaId, productoId),
     enabled: !!tiendaId && !!productoId,
+    // El detalle siempre se refresca al entrar: precios, stock y variantes
+    // pueden cambiar desde el dashboard y no queremos mostrar datos viejos.
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
 export const useResenasTienda = (tiendaId: number, pagina = 1, limite = 10) =>
@@ -180,3 +187,19 @@ export const useCrearPedido = (tiendaId: number) => {
     },
   });
 };
+
+// ── Páginas legales ──
+export const usePaginaLegal = (tiendaId: number, tipo: TipoLegal) =>
+  useQuery({
+    queryKey: ['legal', tiendaId, tipo],
+    queryFn: () => getPaginaLegal(tiendaId, tipo),
+    enabled: !!tiendaId,
+    retry: false, // 404 = no existe/no activa; no reintentar
+  });
+
+export const usePaginasLegalesActivas = (tiendaId: number) =>
+  useQuery({
+    queryKey: ['legal-activas', tiendaId],
+    queryFn: () => getPaginasLegalesActivas(tiendaId),
+    enabled: !!tiendaId,
+  });

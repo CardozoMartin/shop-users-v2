@@ -48,6 +48,8 @@ export interface Categoria {
 export interface ProductoVariante {
   id: number;
   nombre: string;
+  color?: string | null;
+  talle?: string | null;
   sku?: string | null;
   precioExtra?: number | string;
   imagenUrl?: string | null;
@@ -70,6 +72,15 @@ export interface Producto {
   tags?: { id: number; nombre: string }[];
   destacado?: boolean;
   categoria?: Categoria;
+  guiaTalles?: GuiaTalles | null;
+}
+
+export interface GuiaTalles {
+  id: number;
+  nombre: string;
+  columnas: string[];
+  filas: string[][];
+  nota?: string | null;
 }
 
 export interface MetodoPagoConfig {
@@ -145,6 +156,9 @@ export interface Tienda {
   sitioWeb?: string;
   ciudad?: string;
   provincia?: string;
+  razonSocial?: string | null;
+  cuit?: string | null;
+  domicilioLegal?: string | null;
   activa?: boolean;
   temaConfig?: TemaConfig;
   carrusel?: HeroSlide[];

@@ -1,6 +1,16 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Tienda } from '../../../types';
 import { basePathTienda } from '../../../utils/dominio';
+import BotonArrepentimiento from '../BotonArrepentimiento';
+import DatosLegales from '../DatosLegales';
+import { usePaginasLegalesActivas } from '../../../hooks/useTienda';
+
+// Mapa tipo de página legal → ruta pública
+const RUTA_LEGAL: Record<string, string> = {
+  TERMINOS: 'terminos',
+  CAMBIOS: 'cambios',
+  PRIVACIDAD: 'privacidad',
+};
 
 interface Props {
   tienda: Tienda;
@@ -14,6 +24,8 @@ export default function FooterCentrado({ tienda, acento, onScrollTo }: Props) {
   const bp = basePathTienda(tienda.slug);
   const home = bp || '/';
   const enHome = location.pathname === home || location.pathname === `${bp}/`;
+
+  const { data: paginasLegales = [] } = usePaginasLegalesActivas(tienda.id);
 
   const irAInicio = () => {
     if (enHome) onScrollTo('inicio');
@@ -97,6 +109,28 @@ export default function FooterCentrado({ tienda, acento, onScrollTo }: Props) {
             ))}
           </div>
         )}
+
+        {/* Links legales activos */}
+        {paginasLegales.length > 0 && (
+          <div className="flex gap-4 flex-wrap justify-center">
+            {paginasLegales.map((p) => (
+              <button
+                key={p.tipo}
+                onClick={() => navigate(`${bp}/${RUTA_LEGAL[p.tipo] ?? ''}`)}
+                className="text-xs cursor-pointer border-none bg-transparent transition-colors hover:opacity-60"
+                style={{ color: 'var(--s-muted)' }}
+              >
+                {p.titulo}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Botón de arrepentimiento (obligatorio) */}
+        <BotonArrepentimiento tiendaId={tienda.id} acento={acento} />
+
+        {/* Datos legales del vendedor */}
+        <DatosLegales tienda={tienda} className="text-center" />
       </div>
 
       {/* Copyright */}
