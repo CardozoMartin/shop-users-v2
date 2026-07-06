@@ -586,7 +586,7 @@ export default function ProductoDetalle({ tienda }: Props) {
                 <div className="flex gap-4 md:gap-6 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                   {relacionados.map((p) => (
                     <div key={p.id} className="flex-shrink-0 w-40 sm:w-52 snap-start">
-                      <ProductCard producto={p} acento={c.acento} onSelect={() => {}} onAdd={() => {}} />
+                      <ProductCard producto={p} acento={c.acento} variante={tienda.temaConfig?.cardVariante} onSelect={() => {}} onAdd={() => {}} />
                     </div>
                   ))}
                 </div>

@@ -1,13 +1,14 @@
 import { useRef } from 'react';
 import { useDestacados } from '../../../hooks/useTienda';
-import ProductCard from '../Productos/ProductCard';
+import ProductCard, { type CardVariante } from '../Productos/ProductCard';
 
 interface Props {
   tiendaId: number;
   acento: string;
+  cardVariante?: CardVariante;
 }
 
-export default function Destacados({ tiendaId, acento }: Props) {
+export default function Destacados({ tiendaId, acento, cardVariante }: Props) {
   const { data: productos, isLoading } = useDestacados(tiendaId);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +83,7 @@ export default function Destacados({ tiendaId, acento }: Props) {
               ))
             : (productos ?? []).map((p) => (
                 <div key={p.id} className="flex-shrink-0 w-44 sm:w-56 snap-start">
-                  <ProductCard producto={p} acento={acento} destacado onSelect={() => {}} onAdd={() => {}} />
+                  <ProductCard producto={p} acento={acento} variante={cardVariante} destacado onSelect={() => {}} onAdd={() => {}} />
                 </div>
               ))}
         </div>

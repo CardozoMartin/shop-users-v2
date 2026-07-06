@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import type { Tienda } from '../../../types';
 import { useAuthStore } from '../../../store/auth';
 import { basePathTienda } from '../../../utils/dominio';
+import { usePromocionesNav } from '../../../hooks/useTienda';
+import CategoriasMenu, { CategoriasMobile } from './CategoriasMenu';
 
 interface Props {
   tienda: Tienda;
@@ -47,9 +49,12 @@ export default function NavbarPill({ tienda, cartCount, acento, onCartClick, onS
     return `${base} ${padding} bg-white`;
   })();
 
+  const { data: promos = [] } = usePromocionesNav(tienda.id);
+
+  // "Productos" ahora es el mega-menú de categorías (CategoriasMenu), no un link plano.
   const links = [
     { label: 'Inicio', id: 'inicio', tipo: 'seccion' as const },
-    { label: 'Productos', to: `${bp}/productos`, tipo: 'ruta' as const },
+    ...promos.map((p) => ({ label: p.nombre, to: `${bp}/ofertas/${p.slug}`, tipo: 'ruta' as const })),
     { label: 'Nosotros', to: `${bp}/nosotros`, tipo: 'ruta' as const },
   ];
 
@@ -87,7 +92,23 @@ export default function NavbarPill({ tienda, cartCount, acento, onCartClick, onS
 
       {/* Píldora central de links (desktop) */}
       <div className="hidden md:flex items-center bg-zinc-50 border border-zinc-200 rounded-full px-1 py-1 gap-2">
-        {links.map((l) => (
+        <button
+          onClick={() => handleLink(links[0])}
+          className={`px-4 py-1.5 rounded-full text-sm transition-colors border cursor-pointer ${
+            esActivo(links[0])
+              ? 'bg-white border-zinc-200 font-medium text-zinc-800 hover:text-zinc-600'
+              : 'border-transparent text-zinc-500 hover:text-zinc-700'
+          }`}
+        >
+          {links[0].label}
+        </button>
+
+        {/* Mega-menú de categorías (reemplaza el link "Productos") */}
+        <div className="px-4 py-1.5 rounded-full text-sm text-zinc-500 hover:text-zinc-700">
+          <CategoriasMenu tiendaId={tienda.id} tiendaSlug={tienda.slug} basePath={bp} acento={acento} label="Productos" />
+        </div>
+
+        {links.slice(1).map((l) => (
           <button
             key={l.label}
             onClick={() => handleLink(l)}
@@ -166,7 +187,20 @@ export default function NavbarPill({ tienda, cartCount, acento, onCartClick, onS
       {/* Menú mobile */}
       {open && (
         <div className="absolute top-full left-0 w-full bg-white border-t border-zinc-200 flex flex-col p-5 gap-1 md:hidden z-50">
-          {links.map((l) => (
+          <button
+            onClick={() => handleLink(links[0])}
+            className={`px-4 py-2.5 rounded-lg text-sm text-left border-none bg-transparent cursor-pointer ${
+              esActivo(links[0]) ? 'bg-zinc-50 font-medium text-zinc-800' : 'text-zinc-500 hover:bg-zinc-50'
+            }`}
+          >
+            {links[0].label}
+          </button>
+
+          <div className="px-4">
+            <CategoriasMobile tiendaId={tienda.id} basePath={bp} label="Productos" onNavigate={() => setOpen(false)} />
+          </div>
+
+          {links.slice(1).map((l) => (
             <button
               key={l.label}
               onClick={() => handleLink(l)}

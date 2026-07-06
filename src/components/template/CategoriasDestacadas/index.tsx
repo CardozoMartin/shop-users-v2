@@ -14,24 +14,12 @@ export default function CategoriasDestacadas({ categorias, acento }: Props) {
   return (
     <section className="py-14 px-6 md:px-16 lg:px-24" style={{ background: 'var(--s-bg)' }}>
       <div className="max-w-screen-xl mx-auto">
-        <div className="mb-6">
-          <span
-            className="inline-block px-3 py-1 rounded-full text-white text-xs font-semibold mb-2"
-            style={{ background: acento, fontSize: 11 }}
-          >
-            Categorías
-          </span>
-          <h2 className="text-2xl md:text-3xl font-medium" style={{ color: 'var(--s-txt)' }}>
-            Explorá por categoría
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((c) => (
+        <div className="flex flex-wrap justify-center gap-4">
+          {items.slice(0, 4).map((c) => (
             <a
               key={c.id}
               href={c.linkUrl}
-              className="group relative block overflow-hidden rounded-2xl aspect-[4/3]"
+              className="group relative block overflow-hidden rounded-2xl aspect-[4/3] w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]"
             >
               <img
                 src={c.imagenUrl}

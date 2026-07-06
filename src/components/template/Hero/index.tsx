@@ -1,6 +1,7 @@
 import type { Tienda } from '../../../types';
-import Carrusel from './Carrusel';
+import { basePathTienda } from '../../../utils/dominio';
 import GaleriaExpandible from './GaleriaExpandible';
+import HeroDenim from './HeroDenim';
 
 interface Props {
   tienda: Tienda;
@@ -8,32 +9,14 @@ interface Props {
   onScrollTo: (id: string) => void;
 }
 
-const FRASES_FALLBACK = [
-  'Envío gratis a todo el país',
-  'Pagá en cuotas sin interés',
-  'Cambios y devoluciones fáciles',
-  'Atención por WhatsApp',
-];
-
 export default function Hero({ tienda, acento, onScrollTo }: Props) {
   const tema = tienda.temaConfig ?? {};
-  const tipo = tema.tipoSeccionHero ?? 'HERO_FIJO';
+  // Tipos disponibles: CARRUSEL (default, diseño denim) y GALERIA. Cualquier valor
+  // viejo cae a CARRUSEL.
+  const tipo = tema.tipoSeccionHero === 'GALERIA' ? 'GALERIA' : 'CARRUSEL';
   const slides = (tienda.carrusel ?? []).filter((s) => s.activa !== false && s.url);
 
-  // Modo carrusel: el dueño eligió CARRUSEL y subió imágenes
-  if (tipo === 'CARRUSEL' && slides.length > 0) {
-    return (
-      <Carrusel
-        slides={slides}
-        intervalo={tema.intervaloCarrusel ?? 5000}
-        acento={acento}
-        titulo={tema.heroTitulo}
-        subtitulo={tema.heroSubtitulo}
-      />
-    );
-  }
-
-  // Modo galería expandible: reusa las imágenes del carrusel.
+  // Modo galería expandible (reusa las imágenes del carrusel).
   if (tipo === 'GALERIA' && slides.length > 0) {
     return (
       <GaleriaExpandible
@@ -45,30 +28,38 @@ export default function Hero({ tienda, acento, onScrollTo }: Props) {
     );
   }
 
-  const titulo = tema.heroTitulo || tienda.nombre || 'Build. Launch. Scale. Without the complexity.';
-  const subtitulo = tema.heroSubtitulo || tienda.descripcion ||
-    'A high-performance, serverless Postgres database that helps you ship fast and scale without limits.';
-  const ctaTexto = tema.heroCtaTexto || 'get started for free';
+  // Modo carrusel (default) cuando hay imágenes. Usa el diseño denim (imagen cover,
+  // gradiente lateral, overlay con copete/título/CTA, flechas, dots y links por slide).
+  if (tipo === 'CARRUSEL' && slides.length > 0) {
+    return (
+      <HeroDenim
+        slides={slides}
+        intervalo={tema.intervaloCarrusel ?? 5000}
+        acento={acento}
+        basePath={basePathTienda(tienda.slug ?? '')}
+        onScrollTo={onScrollTo}
+      />
+    );
+  }
 
-  const frases = (tienda.marqueeItems && tienda.marqueeItems.length > 0)
-    ? [...tienda.marqueeItems].sort((a, b) => a.orden - b.orden).map((m) => m.texto)
-    : FRASES_FALLBACK;
+  // Fallback: todavía no hay imágenes cargadas. Mostramos un encabezado mínimo
+  // (título + subtítulo + CTA) para que la sección no quede vacía.
+  const titulo = tema.heroTitulo || tienda.nombre || '';
+  const subtitulo = tema.heroSubtitulo || tienda.descripcion || '';
+  const ctaTexto = tema.heroCtaTexto || 'Ver productos';
 
   return (
-    <section
-      id="inicio"
-      className="flex flex-col items-center bg-cover text-gray-800 pb-16 text-sm"
-      style={{ backgroundImage: "url('https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/gradientBg.svg')" }}
-    >
-      {/* Título con degradado */}
-      <h1 className="text-4xl md:text-6xl text-center font-medium max-w-3xl mt-32 bg-gradient-to-r from-black to-[#748298] text-transparent bg-clip-text">
-        {titulo}
-      </h1>
-      <p className="text-slate-600 md:text-base max-md:px-2 text-center max-w-xl mt-3">
-        {subtitulo}
-      </p>
-
-      {/* CTA pill */}
+    <section id="inicio" className="flex flex-col items-center text-center px-6 pt-24 pb-16">
+      {titulo && (
+        <h1 className="text-3xl md:text-5xl font-semibold max-w-3xl" style={{ color: 'var(--s-txt)' }}>
+          {titulo}
+        </h1>
+      )}
+      {subtitulo && (
+        <p className="md:text-base max-w-xl mt-3" style={{ color: 'var(--s-muted)' }}>
+          {subtitulo}
+        </p>
+      )}
       <button
         onClick={() => onScrollTo('productos')}
         className="flex items-center gap-2 text-white px-8 py-3 mt-8 rounded-full transition hover:opacity-90 border-none cursor-pointer"
@@ -79,22 +70,6 @@ export default function Hero({ tienda, acento, onScrollTo }: Props) {
           <path d="M4.166 10h11.667m0 0L9.999 4.167M15.833 10l-5.834 5.834" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-
-      {/* Marquee de frases */}
-      <div className="overflow-hidden w-full relative max-w-5xl mx-auto select-none mt-16">
-        <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none bg-gradient-to-r from-[#f5f7ff] to-transparent" />
-        <div className="marquee-inner flex will-change-transform min-w-[200%]">
-          <div className="flex py-4 items-center">
-            {[...frases, ...frases].map((frase, i) => (
-              <span key={i} className="flex items-center whitespace-nowrap">
-                <span className="text-slate-600 text-base font-medium">{frase}</span>
-                <span className="mx-10 text-lg" style={{ color: acento }}>✦</span>
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none bg-gradient-to-l from-[#efe9f4] to-transparent" />
-      </div>
     </section>
   );
 }

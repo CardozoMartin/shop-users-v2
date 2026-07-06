@@ -22,6 +22,8 @@ import {
   getPaginaLegal,
   getPaginasLegalesActivas,
   type TipoLegal,
+  getPromocionesNav,
+  getPromocionPorSlug,
 } from '../api/tienda';
 import { useCarritoStore } from '../store/carrito';
 import type { CrearPedidoDto } from '../types';
@@ -68,6 +70,22 @@ export const useListadoProductos = (tiendaId: number, filtros: FiltrosProductos)
     queryKey: ['listado-productos', tiendaId, filtros],
     queryFn: () => getProductos(tiendaId, filtros),
     enabled: !!tiendaId,
+  });
+
+// Promos activas de la tienda (links del navbar).
+export const usePromocionesNav = (tiendaId: number) =>
+  useQuery({
+    queryKey: ['promociones-nav', tiendaId],
+    queryFn: () => getPromocionesNav(tiendaId),
+    enabled: !!tiendaId,
+  });
+
+// Landing de una oferta por slug.
+export const usePromocionPorSlug = (tiendaId: number, slug: string) =>
+  useQuery({
+    queryKey: ['promocion', tiendaId, slug],
+    queryFn: () => getPromocionPorSlug(tiendaId, slug),
+    enabled: !!tiendaId && !!slug,
   });
 
 export const useResenasProducto = (tiendaId: number, productoId: number, pagina = 1, limite = 6) =>

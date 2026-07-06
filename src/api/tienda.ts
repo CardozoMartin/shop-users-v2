@@ -95,6 +95,41 @@ export const getProductos = async (
   };
 };
 
+// ── Promociones / Ofertas ──
+export interface PromocionNav {
+  id: number;
+  nombre: string;
+  slug: string;
+}
+
+export interface PromocionProductoPublico extends Producto {
+  precioEfectivo: number;
+  enOferta: boolean;
+  descuento: { tipoDescuento: 'PORCENTAJE' | 'MONTO_FIJO'; valor: number } | null;
+}
+
+export interface PromocionPublica {
+  id: number;
+  nombre: string;
+  slug: string;
+  bannerTitulo?: string | null;
+  bannerImagenUrl?: string | null;
+  vigente: boolean;
+  productos: PromocionProductoPublico[];
+}
+
+// Promos activas de la tienda (para los links del navbar).
+export const getPromocionesNav = async (tiendaId: number): Promise<PromocionNav[]> => {
+  const { data } = await api.get(`/tiendas/${tiendaId}/promociones`);
+  return data.datos ?? [];
+};
+
+// Landing de una oferta por slug: sus productos con precio ya calculado.
+export const getPromocionPorSlug = async (tiendaId: number, slug: string): Promise<PromocionPublica> => {
+  const { data } = await api.get(`/tiendas/${tiendaId}/promociones/${slug}`);
+  return data.datos;
+};
+
 export const getPopupActivo = async (tiendaId: number): Promise<Popup | null> => {
   const { data } = await api.get(`/tiendas/${tiendaId}/popup`);
   return data.datos ?? null;
