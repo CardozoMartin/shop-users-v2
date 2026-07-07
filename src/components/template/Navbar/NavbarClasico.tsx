@@ -238,7 +238,7 @@ export default function NavbarClasico({ tienda, cartCount, acento, onCartClick, 
         ) : (
           <button
             onClick={() => navigate(`${bp}/cuenta`)}
-            className="cursor-pointer px-7 py-2 text-white rounded-full transition hover:opacity-90 border-none text-sm font-bold uppercase tracking-wide"
+            className="s-btn cursor-pointer px-7 py-2 text-white transition hover:opacity-90 border-none text-sm font-bold uppercase tracking-wide"
             style={{ background: rivet }}
           >
             Login
@@ -317,7 +317,7 @@ export default function NavbarClasico({ tienda, cartCount, acento, onCartClick, 
             </button>
             <button
               onClick={() => { logout(); setOpen(false); }}
-              className="cursor-pointer px-6 py-2 mt-2 rounded-full text-sm border bg-transparent"
+              className="s-btn cursor-pointer px-6 py-2 mt-2 text-sm border bg-transparent"
               style={{ borderColor: acento, color: acento }}
             >
               Cerrar sesión ({cliente.nombre})
@@ -326,7 +326,7 @@ export default function NavbarClasico({ tienda, cartCount, acento, onCartClick, 
         ) : (
           <button
             onClick={() => { navigate(`${bp}/cuenta`); setOpen(false); }}
-            className="cursor-pointer px-6 py-2 mt-2 text-white rounded-full text-sm border-none"
+            className="s-btn cursor-pointer px-6 py-2 mt-2 text-white text-sm border-none"
             style={{ background: acento }}
           >
             Login

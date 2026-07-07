@@ -62,7 +62,7 @@ export default function Hero({ tienda, acento, onScrollTo }: Props) {
       )}
       <button
         onClick={() => onScrollTo('productos')}
-        className="flex items-center gap-2 text-white px-8 py-3 mt-8 rounded-full transition hover:opacity-90 border-none cursor-pointer"
+        className="s-btn flex items-center gap-2 text-white px-8 py-3 mt-8 transition hover:opacity-90 border-none cursor-pointer"
         style={{ background: acento }}
       >
         <span>{ctaTexto}</span>

@@ -204,7 +204,7 @@ export default function AuthPage({ tienda }: Props) {
           <button
             type="submit"
             disabled={cargando}
-            className="mt-6 w-full h-11 rounded-full text-white border-none cursor-pointer transition-opacity hover:opacity-90 disabled:opacity-50 text-sm font-medium"
+            className="s-btn mt-6 w-full h-11 text-white border-none cursor-pointer transition-opacity hover:opacity-90 disabled:opacity-50 text-sm font-medium"
             style={{ background: acento }}
           >
             {cargando ? 'Procesando...'

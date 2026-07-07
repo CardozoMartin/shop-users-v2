@@ -434,7 +434,7 @@ export default function ProductoDetalle({ tienda }: Props) {
                   <button
                     onClick={agregarAlCarrito}
                     disabled={sinStock || agregar.isPending || (tieneVariantes && !variante)}
-                    className="flex-1 py-3.5 rounded-full font-medium text-white cursor-pointer border-none transition-opacity hover:opacity-90 disabled:opacity-40"
+                    className="s-btn flex-1 py-3.5 font-medium text-white cursor-pointer border-none transition-opacity hover:opacity-90 disabled:opacity-40"
                     style={{ background: c.acento }}
                   >
                     {sinStock

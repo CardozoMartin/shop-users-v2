@@ -49,6 +49,9 @@ export default function Template({ tienda }: Props) {
   const catDestActivas = tienda.temaConfig?.categoriasDestacadasActivas ?? false;
   const catDestPosicion = tienda.temaConfig?.categoriasDestacadasPosicion ?? 'ANTES';
 
+  // Forma de los botones de acción: REDONDEADO (píldora) o CUADRADO (esquinas rectas con leve radio).
+  const btnRadius = tienda.temaConfig?.botonForma === 'CUADRADO' ? '6px' : '9999px';
+
   const cssVars = {
     '--s-bg': c.bg,
     '--s-surface': c.surface,
@@ -56,6 +59,7 @@ export default function Template({ tienda }: Props) {
     '--s-muted': c.muted,
     '--s-border': c.border,
     '--s-acento': c.acento,
+    '--s-btn-radius': btnRadius,
   } as React.CSSProperties;
 
   return (

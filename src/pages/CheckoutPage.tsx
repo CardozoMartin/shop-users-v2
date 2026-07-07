@@ -223,7 +223,7 @@ export default function CheckoutPage({ tienda }: Props) {
               </p>
             </div>
           )}
-          <Link to={`${bp || "/"}`} className="inline-block px-8 py-3 rounded-full text-sm font-semibold text-white" style={{ background: c.acento }}>
+          <Link to={`${bp || "/"}`} className="s-btn inline-block px-8 py-3 text-sm font-semibold text-white" style={{ background: c.acento }}>
             Volver a la tienda
           </Link>
         </main>
@@ -240,7 +240,7 @@ export default function CheckoutPage({ tienda }: Props) {
         <main className="max-w-lg mx-auto px-6 py-24 text-center min-h-[60vh]">
           <p className="text-5xl mb-4">🛒</p>
           <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--s-txt)' }}>Tu carrito está vacío</h1>
-          <Link to={`${bp}/productos`} className="inline-block mt-4 px-8 py-3 rounded-full text-sm font-semibold text-white" style={{ background: c.acento }}>
+          <Link to={`${bp}/productos`} className="s-btn inline-block mt-4 px-8 py-3 text-sm font-semibold text-white" style={{ background: c.acento }}>
             Ver productos
           </Link>
         </main>
@@ -456,7 +456,7 @@ export default function CheckoutPage({ tienda }: Props) {
               <button
                 type="submit"
                 disabled={crearPedido.isPending || redirigiendo}
-                className="w-full mt-5 py-3.5 rounded-full text-sm font-semibold text-white cursor-pointer border-none transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="s-btn w-full mt-5 py-3.5 text-sm font-semibold text-white cursor-pointer border-none transition-opacity hover:opacity-90 disabled:opacity-50"
                 style={{ background: c.acento }}
               >
                 {redirigiendo ? 'Redirigiendo a Mercado Pago...'
