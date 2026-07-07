@@ -1,6 +1,6 @@
 import { basePathTienda } from '../utils/dominio';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { Tienda } from '../types';
 import { useListadoProductos, useCategorias, useCarrito } from '../hooks/useTienda';
 import type { FiltrosProductos } from '../api/tienda';
@@ -36,14 +36,26 @@ export default function ProductosLista({ tienda }: Props) {
   const c = resolveColors(tienda);
 
   // Estado de filtros
+  const [searchParams, setSearchParams] = useSearchParams();
   const [busquedaInput, setBusquedaInput] = useState('');
   const [busqueda, setBusqueda] = useState('');
-  const [categoriaId, setCategoriaId] = useState<number | undefined>();
+  // categoriaId se inicializa desde la URL (?categoria=ID) para que los links del
+  // mega-menú del navbar abran el listado ya filtrado.
+  const catParam = searchParams.get('categoria');
+  const [categoriaId, setCategoriaId] = useState<number | undefined>(catParam ? Number(catParam) : undefined);
   const [precioMin, setPrecioMin] = useState('');
   const [precioMax, setPrecioMax] = useState('');
   const [ordenIdx, setOrdenIdx] = useState(0);
   const [pagina, setPagina] = useState(1);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Si la URL cambia (ej: navegás a otra categoría desde el navbar estando ya en /productos),
+  // sincronizamos el filtro.
+  useEffect(() => {
+    const c = searchParams.get('categoria');
+    setCategoriaId(c ? Number(c) : undefined);
+    setPagina(1);
+  }, [searchParams]);
 
   useEffect(() => {
     if (debounce.current) clearTimeout(debounce.current);
@@ -81,7 +93,7 @@ export default function ProductosLista({ tienda }: Props) {
   } as React.CSSProperties;
 
   const limpiarFiltros = () => {
-    setBusquedaInput(''); setBusqueda(''); setCategoriaId(undefined);
+    setBusquedaInput(''); setBusqueda(''); setSearchParams({});
     setPrecioMin(''); setPrecioMax(''); setOrdenIdx(0); setPagina(1);
   };
 
@@ -130,7 +142,7 @@ export default function ProductosLista({ tienda }: Props) {
                   <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--s-txt)' }}>Categorías</p>
                   <div className="flex flex-col gap-1">
                     <button
-                      onClick={() => { setCategoriaId(undefined); setPagina(1); }}
+                      onClick={() => { setSearchParams({}); }}
                       className="text-left text-sm py-1 cursor-pointer border-none bg-transparent transition-colors"
                       style={{ color: !categoriaId ? c.acento : 'var(--s-muted)', fontWeight: !categoriaId ? 600 : 400 }}
                     >
@@ -139,7 +151,7 @@ export default function ProductosLista({ tienda }: Props) {
                     {categorias.map((cat) => (
                       <button
                         key={cat.id}
-                        onClick={() => { setCategoriaId(cat.id); setPagina(1); }}
+                        onClick={() => { setSearchParams({ categoria: String(cat.id) }); }}
                         className="text-left text-sm py-1 cursor-pointer border-none bg-transparent transition-colors"
                         style={{ color: categoriaId === cat.id ? c.acento : 'var(--s-muted)', fontWeight: categoriaId === cat.id ? 600 : 400 }}
                       >
@@ -219,7 +231,7 @@ export default function ProductosLista({ tienda }: Props) {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                 {productos.map((p) => (
-                  <ProductCard key={p.id} producto={p} acento={c.acento} onSelect={() => {}} onAdd={() => {}} />
+                  <ProductCard key={p.id} producto={p} acento={c.acento} variante={tienda.temaConfig?.cardVariante} onSelect={() => {}} onAdd={() => {}} />
                 ))}
               </div>
             )}

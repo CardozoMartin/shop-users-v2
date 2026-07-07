@@ -5,6 +5,7 @@ import { useDocumentHead } from '../hooks/useDocumentHead';
 import Template from '../components/template';
 import ProductoDetalle from './ProductoDetalle';
 import ProductosLista from './ProductosLista';
+import OfertaPage from './OfertaPage';
 import NosotrosPage from './NosotrosPage';
 import CheckoutPage from './CheckoutPage';
 import AuthPage from './AuthPage';
@@ -66,6 +67,7 @@ export default function StorePage() {
     <Routes>
       <Route index element={<Template tienda={tienda} />} />
       <Route path="productos" element={<ProductosLista tienda={tienda} />} />
+      <Route path="ofertas/:slug" element={<OfertaPage tienda={tienda} />} />
       <Route path="nosotros" element={<NosotrosPage tienda={tienda} />} />
       <Route path="checkout" element={<CheckoutPage tienda={tienda} />} />
       <Route path="cuenta" element={<AuthPage tienda={tienda} />} />

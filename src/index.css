@@ -13,6 +13,9 @@
   --s-muted: #748298;
   --s-border: #e5e7eb;
   --s-acento: #6366f1;
+  /* Forma de los botones de acción: 9999px = píldora (default) · 6px = cuadrado.
+     La setea el Template según temaConfig.botonForma. */
+  --s-btn-radius: 9999px;
   /* Fuentes del kit tipográfico (las setea useFuenteKit según la tienda) */
   --s-font-display: 'Poppins', system-ui, sans-serif;
   --s-font-body: 'Poppins', system-ui, sans-serif;
@@ -38,6 +41,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Marca del navbar y nombre de producto: fuente display */
 .s-display { font-family: var(--s-font-display); }
+
+/* Botones de acción: heredan la forma elegida por la tienda (píldora o cuadrado).
+   Reemplaza a rounded-full en CTAs / "agregar al carrito" / login, etc. */
+.s-btn { border-radius: var(--s-btn-radius); }
 
 #root { min-height: 100svh; }
 

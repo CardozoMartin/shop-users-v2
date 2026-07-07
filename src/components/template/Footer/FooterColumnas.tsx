@@ -31,7 +31,8 @@ export default function FooterColumnas({ tienda, acento, onScrollTo }: Props) {
     else navigate(home);
   };
 
-  const links = [
+  // Columna "Tienda": navegación principal
+  const linksTienda = [
     { label: 'Inicio', onClick: irAInicio },
     { label: 'Productos', onClick: () => navigate(`${bp}/productos`) },
     { label: 'Nosotros', onClick: () => navigate(`${bp}/nosotros`) },
@@ -57,93 +58,104 @@ export default function FooterColumnas({ tienda, acento, onScrollTo }: Props) {
 
   return (
     <footer id="contacto" style={{ background: 'linear-gradient(to bottom, #f1eaff, #ffffff)' }}>
-      <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 sm:grid-cols-3 gap-10">
-        {/* Columna marca */}
-        <div className="flex flex-col items-start gap-4">
-          <button onClick={irAInicio} className="border-none bg-transparent cursor-pointer p-0">
-            {tienda.logoUrl ? (
-              <img src={tienda.logoUrl} alt={tienda.nombre} className="h-11 w-auto object-contain" />
-            ) : (
-              <span className="text-2xl font-semibold" style={{ color: 'var(--s-txt)' }}>{tienda.nombre}</span>
-            )}
-          </button>
-          {tienda.descripcion && (
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'var(--s-muted)' }}>
-              {tienda.descripcion}
-            </p>
-          )}
-        </div>
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Bloque principal: marca + columnas */}
+        <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-14 border-b border-slate-200">
 
-        {/* Columna navegación */}
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--s-txt)' }}>
-            Navegación
-          </p>
-          {links.map((l) => (
-            <button
-              key={l.label}
-              onClick={l.onClick}
-              className="text-sm text-left cursor-pointer border-none bg-transparent transition-colors hover:opacity-60 w-fit"
-              style={{ color: 'var(--s-muted)' }}
-            >
-              {l.label}
+          {/* Marca: logo, descripción y redes */}
+          <div className="max-w-sm flex flex-col items-start gap-5">
+            <button onClick={irAInicio} className="border-none bg-transparent cursor-pointer p-0">
+              {tienda.logoUrl ? (
+                <img src={tienda.logoUrl} alt={tienda.nombre} className="h-11 w-auto object-contain" />
+              ) : (
+                <span className="text-2xl font-semibold" style={{ color: 'var(--s-txt)' }}>{tienda.nombre}</span>
+              )}
             </button>
-          ))}
-        </div>
 
-        {/* Columna redes */}
-        {redes.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--s-txt)' }}>
-              Seguinos
-            </p>
-            <div className="flex items-center gap-3">
-              {redes.map((r, i) => (
-                <a
-                  key={i}
-                  href={r.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={r.label}
-                  title={r.label}
-                  className="flex items-center justify-center w-9 h-9 rounded-full transition-transform hover:scale-110"
-                  style={{ background: r.color }}
-                >
-                  <svg className="w-[18px] h-[18px]" fill="none" stroke="#fff" strokeWidth={1.8} viewBox="0 0 24 24">
-                    {r.icon}
-                  </svg>
-                </a>
-              ))}
+            {tienda.descripcion && (
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--s-muted)' }}>
+                {tienda.descripcion}
+              </p>
+            )}
+
+            {redes.length > 0 && (
+              <div className="flex items-center gap-3">
+                {redes.map((r, i) => (
+                  <a
+                    key={i}
+                    href={r.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={r.label}
+                    title={r.label}
+                    className="flex items-center justify-center w-9 h-9 rounded-full transition-transform hover:scale-110"
+                    style={{ background: r.color }}
+                  >
+                    <svg className="w-[18px] h-[18px]" fill="none" stroke="#fff" strokeWidth={1.8} viewBox="0 0 24 24">
+                      {r.icon}
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Columnas de links */}
+          <div className="w-full md:w-auto flex flex-wrap gap-x-16 gap-y-10">
+            {/* Tienda */}
+            <div className="flex flex-col gap-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--s-txt)' }}>
+                Tienda
+              </h2>
+              <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
+                {linksTienda.map((l) => (
+                  <li key={l.label}>
+                    <button
+                      onClick={l.onClick}
+                      className="text-sm text-left cursor-pointer border-none bg-transparent transition-colors hover:opacity-60"
+                      style={{ color: 'var(--s-muted)' }}
+                    >
+                      {l.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div className="flex flex-col gap-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--s-txt)' }}>
+                Legal
+              </h2>
+              <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
+                {paginasLegales.map((p) => (
+                  <li key={p.tipo}>
+                    <button
+                      onClick={() => navigate(`${bp}/${RUTA_LEGAL[p.tipo] ?? ''}`)}
+                      className="text-sm text-left cursor-pointer border-none bg-transparent transition-colors hover:opacity-60"
+                      style={{ color: 'var(--s-muted)' }}
+                    >
+                      {p.titulo}
+                    </button>
+                  </li>
+                ))}
+                <li>
+                  <BotonArrepentimiento tiendaId={tienda.id} acento={acento} />
+                </li>
+              </ul>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Links legales + botón de arrepentimiento (obligatorio) */}
-      <div className="border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-          {paginasLegales.map((p) => (
-            <button
-              key={p.tipo}
-              onClick={() => navigate(`${bp}/${RUTA_LEGAL[p.tipo] ?? ''}`)}
-              className="text-xs cursor-pointer border-none bg-transparent transition-colors hover:opacity-60"
-              style={{ color: 'var(--s-muted)' }}
-            >
-              {p.titulo}
-            </button>
-          ))}
-          <BotonArrepentimiento tiendaId={tienda.id} acento={acento} />
         </div>
-      </div>
 
-      {/* Copyright + datos legales */}
-      <div className="border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-2 text-xs" style={{ color: 'var(--s-muted)' }}>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>{tienda.nombre} © {new Date().getFullYear()}. Todos los derechos reservados.</span>
-            <span style={{ color: acento }}>Hecho con amor ✦</span>
-          </div>
+        {/* Datos legales del vendedor */}
+        <div className="py-5 border-b border-slate-200">
           <DatosLegales tienda={tienda} />
+        </div>
+
+        {/* Copyright */}
+        <div className="py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs" style={{ color: 'var(--s-muted)' }}>
+          <span>{tienda.nombre} © {new Date().getFullYear()}. Todos los derechos reservados.</span>
+          <span style={{ color: acento }}>Hecho con amor ✦</span>
         </div>
       </div>
     </footer>

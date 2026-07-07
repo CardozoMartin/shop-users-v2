@@ -7,6 +7,7 @@ import Navbar from './Navbar';
 import Hero from './Hero';
 import Destacados from './Destacados';
 import CategoriasDestacadas from './CategoriasDestacadas';
+import CategoriaFilas from './CategoriaFilas';
 import BannerPromo from './BannerPromo';
 import PopupModal from './PopupModal';
 import Productos from './Productos';
@@ -48,6 +49,9 @@ export default function Template({ tienda }: Props) {
   const catDestActivas = tienda.temaConfig?.categoriasDestacadasActivas ?? false;
   const catDestPosicion = tienda.temaConfig?.categoriasDestacadasPosicion ?? 'ANTES';
 
+  // Forma de los botones de acción: REDONDEADO (píldora) o CUADRADO (esquinas rectas con leve radio).
+  const btnRadius = tienda.temaConfig?.botonForma === 'CUADRADO' ? '6px' : '9999px';
+
   const cssVars = {
     '--s-bg': c.bg,
     '--s-surface': c.surface,
@@ -55,6 +59,7 @@ export default function Template({ tienda }: Props) {
     '--s-muted': c.muted,
     '--s-border': c.border,
     '--s-acento': c.acento,
+    '--s-btn-radius': btnRadius,
   } as React.CSSProperties;
 
   return (
@@ -67,7 +72,11 @@ export default function Template({ tienda }: Props) {
         onScrollTo={scrollToSection}
       />
 
-      <main>
+      {/* El navbar TRANSPARENT es position:fixed y se superpone al contenido. Con un
+          padding-top del alto del navbar, el slider EMPIEZA justo donde el navbar termina
+          (el navbar se ve completo arriba, el slider debajo). STICKY/FLOATING ya ocupan
+          su espacio en el flujo, no necesitan compensación. */}
+      <main className={tienda.temaConfig?.navbarStyle === 'TRANSPARENT' ? 'pt-[68px]' : ''}>
         <Hero
           tienda={tienda}
           acento={c.acento}
@@ -78,17 +87,25 @@ export default function Template({ tienda }: Props) {
           <CategoriasDestacadas categorias={tienda.categoriasDestacadas ?? []} acento={c.acento} />
         )}
 
-        <Destacados tiendaId={tienda.id} acento={c.acento} />
+        <Destacados tiendaId={tienda.id} acento={c.acento} cardVariante={tienda.temaConfig?.cardVariante} />
 
         {catDestActivas && catDestPosicion === 'DESPUES' && (
           <CategoriasDestacadas categorias={tienda.categoriasDestacadas ?? []} acento={c.acento} />
         )}
+
+        <CategoriaFilas
+          tiendaId={tienda.id}
+          acento={c.acento}
+          cardVariante={tienda.temaConfig?.cardVariante}
+          filas={tienda.temaConfig?.homeCategoriaFilas}
+        />
 
         <BannerPromo tienda={tienda} acento={c.acento} />
 
         <Productos
           tiendaId={tienda.id}
           acento={c.acento}
+          cardVariante={tienda.temaConfig?.cardVariante}
           onSelect={setProductoSeleccionado}
           onAdd={(p) => agregar.mutate({ productoId: p.id, cantidad: 1 })}
         />

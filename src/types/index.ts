@@ -2,13 +2,16 @@ export interface TemaConfig {
   colorAcento?: string;
   modoOscuro?: boolean;
   navbarStyle?: string;
-  navbarVariante?: 'CLASICO' | 'PILL';
+  navbarVariante?: 'CLASICO' | 'PILL' | 'BOUTIQUE';
+  navbarColorTema?: 'CLARO' | 'OSCURO';
+  cardVariante?: 'CLASICO' | 'MODERNO';
   footerVariante?: 'CENTRADO' | 'COLUMNAS';
+  botonForma?: 'REDONDEADO' | 'CUADRADO';
   fuenteKit?: 'MODERNO' | 'EDITORIAL' | 'IMPACTO' | 'MINIMAL';
   heroTitulo?: string;
   heroSubtitulo?: string;
   heroCtaTexto?: string;
-  tipoSeccionHero?: 'HERO_FIJO' | 'CARRUSEL' | 'GALERIA';
+  tipoSeccionHero?: 'HERO_FIJO' | 'CARRUSEL' | 'GALERIA' | 'BANNER' | 'DENIM';
   intervaloCarrusel?: number;
   seccionesVisibles?: Record<string, boolean>;
   bannerPromoActivo?: boolean;
@@ -19,6 +22,8 @@ export interface TemaConfig {
   bannerPromoCtaTexto?: string | null;
   categoriasDestacadasActivas?: boolean;
   categoriasDestacadasPosicion?: 'ANTES' | 'DESPUES';
+  /** IDs de categoría a mostrar como filas/carruseles en el home, en orden. */
+  homeCategoriaFilas?: number[];
 }
 
 export interface CategoriaDestacada {
@@ -36,6 +41,8 @@ export interface HeroSlide {
   titulo?: string;
   subtitulo?: string;
   etiqueta?: string;
+  /** URL de redirección del slide (botón o imagen clickeable). */
+  linkUrl?: string;
   activa?: boolean;
 }
 
