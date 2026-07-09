@@ -537,7 +537,9 @@ export default function ProductoDetalle({ tienda }: Props) {
                   logueado={!!cliente}
                   loginHref={`${bp}/cuenta`}
                   isSaving={crearResena.isPending}
-                  onSubmit={(data) => crearResena.mutateAsync(data)}
+                  onSubmit={async (data) => {
+                    await crearResena.mutateAsync(data);
+                  }}
                 />
               </div>
 

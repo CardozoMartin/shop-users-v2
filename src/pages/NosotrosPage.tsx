@@ -123,12 +123,12 @@ export default function NosotrosPage({ tienda }: Props) {
                 logueado={!!cliente}
                 loginHref={`${bp}/cuenta`}
                 isSaving={crearResena.isPending}
-                onSubmit={(data) =>
-                  crearResena.mutateAsync({
+                onSubmit={async (data) => {
+                  await crearResena.mutateAsync({
                     calificacion: data.calificacion,
                     comentario: data.comentario,
-                  })
-                }
+                  });
+                }}
               />
             </div>
 

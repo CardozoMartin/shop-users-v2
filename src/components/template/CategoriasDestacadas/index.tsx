@@ -2,12 +2,12 @@ import type { CategoriaDestacada } from '../../../types';
 
 interface Props {
   categorias: CategoriaDestacada[];
-  acento: string;
+  acento?: string;
 }
 
 // Sección de categorías destacadas: grilla de tarjetas imagen + título centrado
 // que llevan al link configurado por el dueño (interno o externo).
-export default function CategoriasDestacadas({ categorias, acento }: Props) {
+export default function CategoriasDestacadas({ categorias }: Props) {
   const items = (categorias ?? []).filter((c) => c.activa && c.imagenUrl);
   if (items.length === 0) return null;
 

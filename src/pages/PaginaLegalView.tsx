@@ -1,4 +1,4 @@
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { Tienda } from '../types';
 import { basePathTienda } from '../utils/dominio';
 import { usePaginaLegal, useCarrito } from '../hooks/useTienda';
