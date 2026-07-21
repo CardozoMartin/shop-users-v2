@@ -22,7 +22,7 @@ const DARK = '#2b2926';
 // con logo serif + buscador + cuenta/carrito, y nav inferior con categorías.
 export default function NavbarBrasilia({ tienda, cartCount, acento, onCartClick, onScrollTo }: Props) {
   const [open, setOpen] = useState(false);
-  const { cliente, logout } = useAuthStore();
+  const { cliente } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const bp = basePathTienda(tienda.slug);
