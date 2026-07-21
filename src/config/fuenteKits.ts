@@ -2,7 +2,7 @@
 // El dueño elige UN kit; internamente se asigna la fuente display a
 // navbar/títulos/nombre de producto y la body al resto del texto.
 
-export type FuenteKitId = 'MODERNO' | 'EDITORIAL' | 'IMPACTO' | 'MINIMAL';
+export type FuenteKitId = 'MODERNO' | 'EDITORIAL' | 'IMPACTO' | 'MINIMAL' | 'BRASILIA';
 
 export interface FuenteKit {
   id: FuenteKitId;
@@ -46,6 +46,14 @@ export const FUENTE_KITS: Record<FuenteKitId, FuenteKit> = {
     display: "'DM Serif Display', Georgia, serif",
     body: "'Inter', system-ui, sans-serif",
     googleHref: 'https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap',
+  },
+  BRASILIA: {
+    id: 'BRASILIA',
+    label: 'Brasília',
+    desc: 'Serif elegante y cálida con texto geométrico moderno.',
+    display: "'Cormorant Garamond', Georgia, serif",
+    body: "'Poppins', system-ui, sans-serif",
+    googleHref: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap',
   },
 };
 

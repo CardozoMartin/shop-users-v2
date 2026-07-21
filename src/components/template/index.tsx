@@ -7,6 +7,7 @@ import Navbar from './Navbar';
 import Hero from './Hero';
 import Destacados from './Destacados';
 import CategoriasDestacadas from './CategoriasDestacadas';
+import Beneficios from './Beneficios';
 import CategoriaFilas from './CategoriaFilas';
 import BannerPromo from './BannerPromo';
 import PopupModal from './PopupModal';
@@ -92,6 +93,8 @@ export default function Template({ tienda }: Props) {
         {catDestActivas && catDestPosicion === 'DESPUES' && (
           <CategoriasDestacadas categorias={tienda.categoriasDestacadas ?? []} acento={c.acento} />
         )}
+
+        <Beneficios tienda={tienda} acento={c.acento} />
 
         <CategoriaFilas
           tiendaId={tienda.id}

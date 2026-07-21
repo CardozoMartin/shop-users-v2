@@ -2,6 +2,7 @@ import type { Tienda } from '../../../types';
 import NavbarClasico from './NavbarClasico';
 import NavbarPill from './NavbarPill';
 import NavbarBoutique from './NavbarBoutique';
+import NavbarBrasilia from './NavbarBrasilia';
 
 interface Props {
   tienda: Tienda;
@@ -18,5 +19,6 @@ export default function Navbar(props: Props) {
   const variante = props.tienda.temaConfig?.navbarVariante ?? 'CLASICO';
   if (variante === 'PILL') return <NavbarPill {...props} />;
   if (variante === 'BOUTIQUE') return <NavbarBoutique {...props} />;
+  if (variante === 'BRASILIA') return <NavbarBrasilia {...props} />;
   return <NavbarClasico {...props} />;
 }

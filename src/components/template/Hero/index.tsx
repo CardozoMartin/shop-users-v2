@@ -2,6 +2,7 @@ import type { Tienda } from '../../../types';
 import { basePathTienda } from '../../../utils/dominio';
 import GaleriaExpandible from './GaleriaExpandible';
 import HeroDenim from './HeroDenim';
+import HeroBrasilia from './HeroBrasilia';
 
 interface Props {
   tienda: Tienda;
@@ -11,10 +12,20 @@ interface Props {
 
 export default function Hero({ tienda, acento, onScrollTo }: Props) {
   const tema = tienda.temaConfig ?? {};
-  // Tipos disponibles: CARRUSEL (default, diseño denim) y GALERIA. Cualquier valor
-  // viejo cae a CARRUSEL.
-  const tipo = tema.tipoSeccionHero === 'GALERIA' ? 'GALERIA' : 'CARRUSEL';
+  // Tipos disponibles: CARRUSEL (default, diseño denim), GALERIA y BRASILIA.
+  // Cualquier valor viejo cae a CARRUSEL.
+  const tipo =
+    tema.tipoSeccionHero === 'GALERIA'
+      ? 'GALERIA'
+      : tema.tipoSeccionHero === 'BRASILIA'
+        ? 'BRASILIA'
+        : 'CARRUSEL';
   const slides = (tienda.carrusel ?? []).filter((s) => s.activa !== false && s.url);
+
+  // Modo Brasília: dos imágenes lado a lado con overlay centrado.
+  if (tipo === 'BRASILIA' && slides.length > 0) {
+    return <HeroBrasilia slides={slides} acento={acento} onScrollTo={onScrollTo} />;
+  }
 
   // Modo galería expandible (reusa las imágenes del carrusel).
   if (tipo === 'GALERIA' && slides.length > 0) {

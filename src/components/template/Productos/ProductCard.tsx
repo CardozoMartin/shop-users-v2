@@ -1,8 +1,9 @@
 import type { Producto } from '../../../types';
 import ProductCardClasico from './ProductCardClasico';
 import ProductCardModerno from './ProductCardModerno';
+import ProductCardBrasilia from './ProductCardBrasilia';
 
-export type CardVariante = 'CLASICO' | 'MODERNO';
+export type CardVariante = 'CLASICO' | 'MODERNO' | 'BRASILIA';
 
 interface Props {
   producto: Producto;
@@ -22,5 +23,6 @@ interface Props {
 // vive en ProductCardClasico / ProductCardModerno.
 export default function ProductCard({ variante = 'CLASICO', ...props }: Props) {
   if (variante === 'MODERNO') return <ProductCardModerno {...props} />;
+  if (variante === 'BRASILIA') return <ProductCardBrasilia {...props} />;
   return <ProductCardClasico {...props} />;
 }
